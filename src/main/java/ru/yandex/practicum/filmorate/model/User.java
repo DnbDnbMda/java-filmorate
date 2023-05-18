@@ -43,9 +43,10 @@ public class User {
         this.login = login;
         this.name = name;
         this.birthday = birthday;
-
     }
+
     private int generateIdUser() {
-        return UserController.getMaxIdUser()+1;
+        int maxId = UserController.getMaxIdUser()+1;
+        return maxId;
     }
 }
