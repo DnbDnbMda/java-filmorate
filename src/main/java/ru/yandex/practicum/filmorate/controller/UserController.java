@@ -18,6 +18,28 @@ public class UserController {
 
     @PostMapping("/users")
     public User putUser(@Valid @RequestBody User user) throws ValidEx {
+        if (validateUserData(user)) {
+            users.put(user.getId(), user);
+            log.info("Создан пользователь");
+            return user;
+        } else return null;
+    }
+
+    @PutMapping("/users")
+    public User updateUser(@Valid @RequestBody User user) throws ValidEx {
+        if (validateUserData(user)) {
+            users.put(user.getId(), user);
+            log.info("Создан пользователь");
+            return user;
+        } else return null;
+    }
+
+    @GetMapping("/users")
+    public List<User> getUsers() {
+        return new ArrayList<>(users.values());
+    }
+
+    public boolean validateUserData(User user) throws ValidEx {
         if (user.getLogin().isEmpty()) {
             throw new ValidEx("Логин не может быть пустым");
         } else if (user.getEmail().isEmpty()) {
@@ -29,14 +51,7 @@ public class UserController {
         } else if (user.getBirthday().after(new Date())) {
             throw new ValidEx("Дата рождения пользователя не может быть больше текущей даты");
         } else {
-            users.put(user.getId(), user);
-            log.info("Создан пользователь");
-            return user;
+            return true;
         }
-    }
-
-    @GetMapping("/users")
-    public List<User> getUsers() {
-        return new ArrayList<>(users.values());
     }
 }
