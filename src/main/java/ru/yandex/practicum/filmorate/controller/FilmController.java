@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 public class FilmController {
     private final HashMap<Integer, Film> films = new HashMap<>();
-    private final static Date LIMITE_DATE = Date.from(Instant.parse("1895-12-28T00:00:00.00Z"));
+    private static final Date LIMITE_DATE = Date.from(Instant.parse("1895-12-28T00:00:00.00Z"));
 
     @PostMapping("/films")
     public Film putFilm(@Valid @RequestBody Film film) throws ValidEx {
