@@ -46,7 +46,7 @@ public class User {
     }
 
     private int generateIdUser() {
-        int maxId = UserController.getMaxIdUser()+1;
-        return maxId;
+        int maxId = UserController.getMaxIdUser();
+        return maxId++;
     }
 }
