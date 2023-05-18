@@ -6,15 +6,12 @@ import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @RestController
 public class UserController {
-    private final HashMap<Integer, User> users = new HashMap<>();
+    private static final HashMap<Integer, User> users = new HashMap<>();
 
     @PostMapping("/users")
     public User putUser(@Valid @RequestBody User user) throws ValidEx {
@@ -53,5 +50,11 @@ public class UserController {
         } else {
             return true;
         }
+    }
+
+    public static Integer getMaxIdUser(){
+        Set<Integer> listOfId = users.keySet();
+        Optional<Integer> max = listOfId.stream().max(Comparator.comparing(ft -> ft));
+        return max.orElse(0);
     }
 }
