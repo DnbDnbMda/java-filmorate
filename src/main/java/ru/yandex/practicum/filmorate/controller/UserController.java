@@ -52,7 +52,7 @@ public class UserController {
         }
     }
 
-    public static Integer getMaxIdUser(){
+    public static Integer getMaxIdUser() {
         Set<Integer> listOfId = users.keySet();
         Optional<Integer> max = listOfId.stream().max(Comparator.comparing(ft -> ft));
         return max.orElse(0);
