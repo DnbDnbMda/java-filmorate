@@ -16,7 +16,7 @@ import java.util.List;
 public class UserController {
     private final HashMap<Integer, User> users = new HashMap<>();
 
-    @PostMapping("/user")
+    @PostMapping("/users")
     public User putUser(@Valid @RequestBody User user) throws ValidEx {
         if (user.getLogin().isEmpty()) {
             throw new ValidEx("Логин не может быть пустым");
@@ -35,7 +35,7 @@ public class UserController {
         }
     }
 
-    @GetMapping("/user")
+    @GetMapping("/users")
     public List<User> getUsers() {
         return new ArrayList<>(users.values());
     }
