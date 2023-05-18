@@ -20,7 +20,7 @@ import java.util.List;
 public class FilmController {
     private final HashMap<Integer, Film> films = new HashMap<>();
 
-    @PutMapping("/film")
+    @PutMapping("/films")
     public Film putFilm(@Valid @RequestBody Film film) throws ValidEx {
         Date limitDate = Date.from(Instant.parse("1895-12-28T00:00:00.00Z"));
         if (film.getName().isBlank()) {
@@ -38,7 +38,7 @@ public class FilmController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/films")
     public List<Film> getFilm() {
         log.info("Получен запрос на получение списка фильмов");
         return new ArrayList<>(films.values());
