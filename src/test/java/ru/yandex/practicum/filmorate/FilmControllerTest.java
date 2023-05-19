@@ -89,7 +89,7 @@ public class FilmControllerTest {
                 .name("название фильма")
                 .id(1)
                 .description("описание")
-                .releaseDate(LocalDate.of(1895, 12, 28))
+                .releaseDate(LocalDate.of(1895, 12, 27))
                 .duration(1)
                 .build();
 
