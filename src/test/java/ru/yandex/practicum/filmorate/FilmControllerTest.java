@@ -10,8 +10,8 @@ import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidEx;
 import ru.yandex.practicum.filmorate.model.Film;
 
-import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Date;
 
 @SpringBootTest
@@ -25,11 +25,11 @@ public class FilmControllerTest {
                 .name("")
                 .id(1)
                 .description("Описание")
-                .realeseDate(Date.from(Instant.parse("1895-12-28T00:00:00.00Z")))
-                .duration(Duration.ofSeconds(1))
+                .releaseDate(LocalDate.of(1895, 12, 28))
+                .duration(1)
                 .build();
 
-        assertThrows(ValidEx.class, () -> filmController.putFilm(film));
+        assertThrows(ValidEx.class, () -> filmController.createFilm(film));
     }
 
     @Test
@@ -40,11 +40,11 @@ public class FilmControllerTest {
                 .name("название фильма")
                 .id(1)
                 .description(description)
-                .realeseDate(Date.from(Instant.parse("1895-12-28T00:00:00.00Z")))
-                .duration(Duration.ofSeconds(1))
+                .releaseDate(LocalDate.of(1895, 12, 28))
+                .duration(1)
                 .build();
 
-        assertThrows(ValidEx.class, () -> filmController.putFilm(film));
+        assertThrows(ValidEx.class, () -> filmController.createFilm(film));
     }
 
     @Test
@@ -57,11 +57,11 @@ public class FilmControllerTest {
                 .name("название фильма")
                 .id(1)
                 .description(description)
-                .realeseDate(Date.from(Instant.parse("1895-12-28T00:00:00.00Z")))
-                .duration(Duration.ofSeconds(1))
+                .releaseDate(LocalDate.of(1895, 12, 28))
+                .duration(1)
                 .build();
 
-        filmController.putFilm(film);
+        filmController.createFilm(film);
         assertEquals(film, filmController.getFilm().get(0));
     }
 
@@ -73,11 +73,11 @@ public class FilmControllerTest {
                 .name("название фильма")
                 .id(1)
                 .description("описание")
-                .realeseDate(Date.from(Instant.parse("1895-12-28T00:00:00.00Z")))
-                .duration(Duration.ofSeconds(1))
+                .releaseDate(LocalDate.of(1895, 12, 28))
+                .duration(1)
                 .build();
 
-        filmController.putFilm(film);
+        filmController.createFilm(film);
         assertEquals(film, filmController.getFilm().get(0));
     }
 
@@ -89,11 +89,11 @@ public class FilmControllerTest {
                 .name("название фильма")
                 .id(1)
                 .description("описание")
-                .realeseDate(Date.from(Instant.parse("1895-12-27T23:59:59.99Z")))
-                .duration(Duration.ofSeconds(1))
+                .releaseDate(LocalDate.of(1895, 12, 28))
+                .duration(1)
                 .build();
 
-        assertThrows(ValidEx.class, () -> filmController.putFilm(film));
+        assertThrows(ValidEx.class, () -> filmController.createFilm(film));
     }
 
 
@@ -105,10 +105,10 @@ public class FilmControllerTest {
                 .name("название фильма")
                 .id(1)
                 .description("описание")
-                .realeseDate(Date.from(Instant.parse("1895-12-28T00:00:00.00Z")))
-                .duration(Duration.ofSeconds(0))
+                .releaseDate(LocalDate.of(1895, 12, 28))
+                .duration(0)
                 .build();
 
-        assertThrows(ValidEx.class, () -> filmController.putFilm(film));
+        assertThrows(ValidEx.class, () -> filmController.createFilm(film));
     }
 }
