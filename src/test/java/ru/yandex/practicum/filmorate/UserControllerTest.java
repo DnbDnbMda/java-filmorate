@@ -38,7 +38,7 @@ public class UserControllerTest {
                 .birthday(birthday)
                 .build();
 
-        assertThrows(ValidEx.class, () -> userController.putUser(user));
+        assertThrows(ValidEx.class, () -> userController.create(user));
     }
 
     @Test
@@ -61,7 +61,7 @@ public class UserControllerTest {
                 .birthday(birthday)
                 .build();
 
-        assertThrows(ValidEx.class, () -> userController.putUser(user));
+        assertThrows(ValidEx.class, () -> userController.create(user));
     }
 
     @Test
@@ -84,7 +84,7 @@ public class UserControllerTest {
                 .birthday(birthday)
                 .build();
 
-        assertThrows(ValidEx.class, () -> userController.putUser(user));
+        assertThrows(ValidEx.class, () -> userController.create(user));
     }
 
     @Test
@@ -107,7 +107,7 @@ public class UserControllerTest {
                 .birthday(birthday)
                 .build();
 
-        assertThrows(ValidEx.class, () -> userController.putUser(user));
+        assertThrows(ValidEx.class, () -> userController.create(user));
     }
 
     @Test
@@ -130,7 +130,7 @@ public class UserControllerTest {
                 .birthday(birthday)
                 .build();
 
-        userController.putUser(user);
+        userController.create(user);
         assertEquals(user, userController.getUsers().get(0));
     }
 
@@ -148,7 +148,7 @@ public class UserControllerTest {
                 .birthday(birthday)
                 .build();
 
-        userController.putUser(user);
+        userController.create(user);
         assertEquals(user, userController.getUsers().get(0));
     }
 
@@ -166,6 +166,6 @@ public class UserControllerTest {
                 .birthday(birthday)
                 .build();
 
-        assertThrows(ValidEx.class, () -> userController.putUser(user));
+        assertThrows(ValidEx.class, () -> userController.create(user));
     }
 }
