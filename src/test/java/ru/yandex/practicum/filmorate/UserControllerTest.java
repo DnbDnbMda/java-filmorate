@@ -6,11 +6,9 @@ import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,14 +19,8 @@ public class UserControllerTest {
     @Test
     public void shouldPutUserLoginIsEmpty() {
         UserController userController = new UserController();
-        DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-        Date birthday;
 
-        try {
-            birthday = formatter.parse("19-04-1985");
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        LocalDate birthday = LocalDate.of(1985, 4, 19);
 
         User user = User.builder()
                 .id(1)
@@ -44,15 +36,7 @@ public class UserControllerTest {
     @Test
     public void shouldLoginContainsSpace() {
         UserController userController = new UserController();
-        DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-        Date birthday;
-
-        try {
-            birthday = formatter.parse("19-04-1985");
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
-
+        LocalDate birthday = LocalDate.of(1985, 4, 19);
         User user = User.builder()
                 .id(1)
                 .login("Иванов Иван")
@@ -67,14 +51,7 @@ public class UserControllerTest {
     @Test
     public void shouldEmailIsEmpty() {
         UserController userController = new UserController();
-        DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-        Date birthday;
-
-        try {
-            birthday = formatter.parse("19-04-1985");
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        LocalDate birthday = LocalDate.of(1985, 4, 19);
 
         User user = User.builder()
                 .id(1)
@@ -90,14 +67,7 @@ public class UserControllerTest {
     @Test
     public void shouldEmailDoesNotContainDog() {
         UserController userController = new UserController();
-        DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-        Date birthday;
-
-        try {
-            birthday = formatter.parse("19-04-1985");
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        LocalDate birthday = LocalDate.of(1985, 4, 19);
 
         User user = User.builder()
                 .id(1)
@@ -113,14 +83,7 @@ public class UserControllerTest {
     @Test
     public void shouldDateBirthIsLessThanCurrentDate() throws ValidEx {
         UserController userController = new UserController();
-        DateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
-        Date birthday;
-
-        try {
-            birthday = formatter.parse("19-04-1985");
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
-        }
+        LocalDate birthday = LocalDate.of(1985, 4, 19);
 
         User user = User.builder()
                 .id(1)
@@ -138,7 +101,7 @@ public class UserControllerTest {
     public void shouldDateBirthIsEqualsCurrentDate() throws
             ValidEx {
         UserController userController = new UserController();
-        Date birthday = new Date();
+        LocalDate birthday = LocalDate.of(1985, 4, 19);
 
         User user = User.builder()
                 .id(1)
@@ -156,7 +119,7 @@ public class UserControllerTest {
     public void shouldDateBirthIsGreaterThanCurrentDate() {
         UserController userController = new UserController();
         Instant instant = new Date().toInstant().plus(Duration.ofDays(1));
-        Date birthday = Date.from(instant);
+        LocalDate birthday = LocalDate.now().plusDays(1);
 
         User user = User.builder()
                 .id(1)
