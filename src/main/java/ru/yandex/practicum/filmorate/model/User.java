@@ -13,13 +13,10 @@ import java.time.LocalDate;
 public class User {
     private Integer id;
     @Email(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
-    private final String email;
+    private String email;
     private String login;
     private String name;
-    private final LocalDate birthday;
-
-    public void user() {
-    }
+    private LocalDate birthday;
 
     public User(Integer id, String email, String login, String name, LocalDate birthday) {
         this.id = id;
