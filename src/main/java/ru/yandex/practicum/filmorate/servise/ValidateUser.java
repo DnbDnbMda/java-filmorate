@@ -12,12 +12,12 @@ import static ru.yandex.practicum.filmorate.controller.UserController.users;
 
 public class ValidateUser {
 
-    public Integer getNewIdUser (){
+    public Integer getNewIdUser() {
         Set<Integer> listOfId = users.keySet();
         Optional<Integer> max = listOfId.stream().max(Comparator.comparing(ft -> ft));
         Integer maxId = max.orElse(0);
         return ++maxId;
-    };
+    }
 
     public boolean validateUserData(User user) throws ValidEx {
         if (user.getId() == null) {
