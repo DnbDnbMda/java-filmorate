@@ -1,27 +1,25 @@
 package ru.yandex.practicum.filmorate.servise;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidEx;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.Set;
 
-import static ru.yandex.practicum.filmorate.controller.UserController.users;
-
+@Component
 public class ValidateUser {
+    private final InMemoryUserStorage inMemoryUserStorage;
 
-    public Integer getNewIdUser() {
-        Set<Integer> listOfId = users.keySet();
-        Optional<Integer> max = listOfId.stream().max(Comparator.comparing(ft -> ft));
-        Integer maxId = max.orElse(0);
-        return ++maxId;
+    @Autowired
+    public ValidateUser(InMemoryUserStorage inMemoryUserStorage) {
+        this.inMemoryUserStorage = inMemoryUserStorage;
     }
 
     public boolean validateUserData(User user) throws ValidEx {
         if (user.getId() == null) {
-            user.setId(getNewIdUser());
+            user.setId(inMemoryUserStorage.generateIdUser());
         }
         if (user.getName() == null) {
             user.setName("common");

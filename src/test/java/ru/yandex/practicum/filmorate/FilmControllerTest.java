@@ -19,7 +19,7 @@ public class FilmControllerTest {
 
     @Test
     public void shouldNameOfFilmIsEmpty() {
-        FilmController filmController = new FilmController();
+        FilmController filmController = new FilmController(validateFilm, userStorage);
 
         Film film = Film.builder()
                 .name("")
@@ -34,7 +34,7 @@ public class FilmControllerTest {
 
     @Test
     public void shouldLengthOfDescriptionGreater200() {
-        FilmController filmController = new FilmController();
+        FilmController filmController = new FilmController(validateFilm, userStorage);
         String description = "d".repeat(201);
         Film film = Film.builder()
                 .name("название фильма")
@@ -49,7 +49,7 @@ public class FilmControllerTest {
 
     @Test
     public void shouldLengthOfDescriptionEquals200() throws ValidEx {
-        FilmController filmController = new FilmController();
+        FilmController filmController = new FilmController(validateFilm, userStorage);
         String description = "d".repeat(200);
         Date date = Date.from(Instant.parse("1895-12-28T00:00:00.00Z"));
 
@@ -67,7 +67,7 @@ public class FilmControllerTest {
 
     @Test
     public void shouldDateEquals28121985() throws ValidEx {
-        FilmController filmController = new FilmController();
+        FilmController filmController = new FilmController(validateFilm, userStorage);
 
         Film film = Film.builder()
                 .name("название фильма")
@@ -83,7 +83,7 @@ public class FilmControllerTest {
 
     @Test
     public void shouldDateBefore28121985() throws ValidEx {
-        FilmController filmController = new FilmController();
+        FilmController filmController = new FilmController(validateFilm, userStorage);
 
         Film film = Film.builder()
                 .name("название фильма")
@@ -99,7 +99,7 @@ public class FilmControllerTest {
 
     @Test
     public void shouldDurationMoreZero() throws ValidEx {
-        FilmController filmController = new FilmController();
+        FilmController filmController = new FilmController(validateFilm, userStorage);
 
         Film film = Film.builder()
                 .name("название фильма")
