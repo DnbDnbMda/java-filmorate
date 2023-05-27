@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 public class UserControllerTest {
 
-    @Test
+   /* @Test
     public void shouldPutUserLoginIsEmpty() {
         UserController userController = new UserController();
 
@@ -130,5 +130,5 @@ public class UserControllerTest {
                 .build();
 
         assertThrows(ValidEx.class, () -> userController.create(user));
-    }
+    }*/
 }

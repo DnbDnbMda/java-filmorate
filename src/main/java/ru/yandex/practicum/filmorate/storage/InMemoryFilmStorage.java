@@ -35,6 +35,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Film getFilmById(int id) {
+        if (films.containsKey(id)){
+            return films.getOrDefault(id,null);
+        } else return null;
+    }
+
+    @Override
     public int generateIdFilm() {
         Set<Integer> listOfId = films.keySet();
         Optional<Integer> max = listOfId.stream().max(Comparator.comparing(ft -> ft));

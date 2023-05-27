@@ -54,5 +54,23 @@ public class UserController {
     public List<User> getUsers() {
         return inMemoryUserStorage.getAllUsers();
     }
+
+    //Добавление в друзья
+    @PutMapping(value = "/users/{id}/friends/{friendId}")
+    public void addFriend (@PathVariable String id, @PathVariable String friendId){
+
+    }
+
+    @DeleteMapping(value = "/users/{id}/friends/{friendId}")
+    public void deleteFriend(String id, String friendId){
+
+    }
+
+    @GetMapping(value = "/users/{id}/friends/common/{otherId}")
+    public void getCommonFriends(String id, String otherId){
+
+    }
+
+
 }
 
