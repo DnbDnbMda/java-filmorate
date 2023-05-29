@@ -13,7 +13,7 @@ import java.util.List;
 
 @Slf4j
 @RestControllerAdvice
-public class ValidExceptionCatсh {
+public class ValidExceptionCatch {
     @ExceptionHandler
     public void handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
         List<String> errors = new ArrayList<>();
