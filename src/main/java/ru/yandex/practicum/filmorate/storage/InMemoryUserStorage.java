@@ -7,7 +7,7 @@ import java.util.*;
 
 @Component
 public class InMemoryUserStorage implements UserStorage {
-    public static final HashMap<Integer, User> users = new HashMap<>();
+    private static final HashMap<Integer, User> users = new HashMap<>();
 
     @Override
     public void createUser(int userId, User user) {
@@ -40,5 +40,10 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public List<User> getAllUsers() {
         return new ArrayList<>(users.values());
+    }
+
+    @Override
+    public User getUserById(int id) {
+        return users.getOrDefault(id, null);
     }
 }

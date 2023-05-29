@@ -2,11 +2,11 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import ru.yandex.practicum.filmorate.exception.UserNotFound;
 import ru.yandex.practicum.filmorate.exception.ValidEx;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.servise.FilmService;
@@ -31,7 +31,6 @@ public class FilmController {
 
     @PostMapping("/films")
     public Film createFilm(@RequestBody Film film) throws ValidEx {
-
         if (validateFilm.validateFilmData(film)) {
             inMemoryFilmStorage.createFilm(film);
             log.info("Добавлен фильм");
@@ -66,12 +65,12 @@ public class FilmController {
     }
 
     @PutMapping(value = "/films/{id}/like/{userId}")
-    public void userSetLikeFilm(@PathVariable String id, @PathVariable String userId) {
+    public void userSetLikeFilm(@PathVariable String id, @PathVariable String userId) throws UserNotFound {
         filmService.userSetLikeFilm(Integer.parseInt(id), Integer.parseInt(userId));
     }
 
     @DeleteMapping(value = "/films/{id}/like/{userId}")
-    public void userDeleteLikeFilm(@PathVariable String id, @PathVariable String userId) {
+    public void userDeleteLikeFilm(@PathVariable String id, @PathVariable String userId) throws UserNotFound {
         filmService.userDeleteLikeFilm(Integer.parseInt(id), Integer.parseInt(userId));
     }
 
@@ -86,6 +85,5 @@ public class FilmController {
         }
         return filmService.getPopularFilms(countOfPopularFilms);
     }
-
 }
 

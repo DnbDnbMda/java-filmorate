@@ -15,7 +15,7 @@ public interface FilmStorage {
 
     List<Film> getAllFilms();
 
-    public Film getFilmById(int id);
+    Film getFilmById(int id);
 
     int generateIdFilm();
 }

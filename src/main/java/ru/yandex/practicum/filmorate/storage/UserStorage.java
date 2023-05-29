@@ -16,4 +16,6 @@ public interface UserStorage {
     int generateIdUser();
 
     List<User> getAllUsers();
+
+    User getUserById(int id);
 }

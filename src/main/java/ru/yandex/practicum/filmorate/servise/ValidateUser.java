@@ -21,7 +21,7 @@ public class ValidateUser {
         if (user.getId() == null) {
             user.setId(inMemoryUserStorage.generateIdUser());
         }
-        if (user.getName() == null) {
+        if (user.getName() == null || user.getName().equals("")) {
             user.setName("common");
         }
         if (user.getLogin() == null) {
