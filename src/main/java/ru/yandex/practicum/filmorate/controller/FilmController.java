@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,17 +18,11 @@ import java.util.*;
 
 @Slf4j
 @RestController
+@AllArgsConstructor
 public class FilmController {
     private final ValidateFilm validateFilm;
     private final InMemoryFilmStorage inMemoryFilmStorage;
     private final FilmService filmService;
-
-    @Autowired
-    public FilmController(ValidateFilm validateFilm, InMemoryFilmStorage inMemoryFilmStorage, FilmService filmService) {
-        this.validateFilm = validateFilm;
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
-        this.filmService = filmService;
-    }
 
     @PostMapping("/films")
     public Film createFilm(@RequestBody Film film) throws ValidEx {
