@@ -61,7 +61,8 @@ public class FilmController {
         Film filmById = inMemoryFilmStorage.getFilmById(Integer.parseInt(id));
         if (filmById == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        } else return filmById;
+        }
+        return filmById;
     }
 
     @PutMapping(value = "/films/{id}/like/{userId}")
