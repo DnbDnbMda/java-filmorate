@@ -7,8 +7,6 @@ import java.util.List;
 public interface FilmStorage {
     void createFilm(Film film);
 
-    void deleteFilm();
-
     void updateFilm(int id, Film film);
 
     boolean containsFilmById(int id);
