@@ -1,28 +1,26 @@
 package ru.yandex.practicum.filmorate.servise;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.ValidEx;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
 
 import java.time.LocalDate;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.Set;
 
-import static ru.yandex.practicum.filmorate.controller.FilmController.films;
-
+@Component
 public class ValidateFilm {
     private static final LocalDate LIMIT_DATE = LocalDate.of(1895, 12, 28);
+    private final InMemoryFilmStorage inMemoryFilmStorage;
 
-    private int generateIdFilm() {
-        Set<Integer> listOfId = films.keySet();
-        Optional<Integer> max = listOfId.stream().max(Comparator.comparing(ft -> ft));
-        int maxId = max.orElse(0);
-        return ++maxId;
+    @Autowired
+    public ValidateFilm(InMemoryFilmStorage inMemoryFilmStorage) {
+        this.inMemoryFilmStorage = inMemoryFilmStorage;
     }
 
     public boolean validateFilmData(Film film) throws ValidEx {
         if (film.getId() == null) {
-            film.setId(generateIdFilm());
+            film.setId(inMemoryFilmStorage.generateIdFilm());
         }
         if (film.getName().isBlank()) {
             throw new ValidEx("Название фильма не может быть пустым");
