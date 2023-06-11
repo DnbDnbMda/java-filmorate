@@ -1,36 +1,31 @@
 package ru.yandex.practicum.filmorate.model;
 
+import jdk.jshell.Snippet;
 import lombok.*;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.util.TreeSet;
+import java.util.*;
 
 @Data
-@Setter
-@Getter
-@ToString
-public class Film {
-    private Integer id;
-    private String name;
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class  Film {
+    private long id;
+    @NotBlank
+    private String name; // название не может быть пустым
+    @NotBlank
+    @Size(max = 200) //описание должно быть не больше 200 символов
     private String description;
     private LocalDate releaseDate;
-    private long duration;
-    private long rate;
-    private TreeSet<Long> likes;
-    private Integer countOfLikes;
-
-    public Film(Integer id, String name, String description, LocalDate releaseDate, long duration) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.rate = 0;
-        this.likes = new TreeSet<>();
-        this.countOfLikes = 0;
-    }
-
-    public Integer getCountOfLikes() {
-        return countOfLikes;
-    }
+    @Positive
+    private int duration; //продолжительность фильма должна быть положительной
+    @NotNull
+    private MpaRating mpa;
+    private final Set<Long> likes = new HashSet<>();
+    private final List<Genre> genres = new ArrayList<>();
 }

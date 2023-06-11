@@ -1,31 +1,33 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.*;
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
-import java.time.LocalDate;
-import java.util.TreeSet;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.PastOrPresent;
+import javax.validation.constraints.Pattern;
 
-@ToString
-@EqualsAndHashCode
-@Getter
-@Setter
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class User {
-    private Integer id;
-    @Email(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")
-    private String email;
+    private long id;
+    @NotBlank
+    @Email
+    private String email; // электронная почта не может быть пустой и должна содержать символ @;
+    @NotBlank
+    @Pattern(regexp = "\\S+") //логин не может быть пустым и содержать пробелы;
     private String login;
     private String name;
-    private LocalDate birthday;
-    @Builder.Default
-    private TreeSet<Long> friends;
-
-    public User(Integer id, String email, String login, String name, LocalDate birthday) {
-        this.id = id;
-        this.email = email;
-        this.login = login;
-        this.name = name;
-        this.birthday = birthday;
-        this.friends = new TreeSet<>();
-    }
+    @PastOrPresent
+    private LocalDate birthday; //дата рождения не может быть в будущем.
+    private final Set<Long> friends = new HashSet<>();
 }
