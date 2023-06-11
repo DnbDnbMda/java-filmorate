@@ -55,7 +55,7 @@ public class FilmServiceImpl implements FilmService {
         validateFilms(film);
         filmStorage.updateFilm(film);
         filmGenreStorage.removeGenreFromFilm(film.getId());
-       if (film.getGenres() != null) {
+        if (film.getGenres() != null) {
             genreStorage.setGenresToFilms(film.getId(), film.getGenres());
         }
         return film;

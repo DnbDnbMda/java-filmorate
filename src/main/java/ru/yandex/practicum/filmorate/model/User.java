@@ -22,9 +22,9 @@ public class User {
     private long id;
     @NotBlank
     @Email
-    private String email; // электронная почта не может быть пустой и должна содержать символ @;
+    private String email;
     @NotBlank
-    @Pattern(regexp = "\\S+") //логин не может быть пустым и содержать пробелы;
+    @Pattern(regexp = "\\S+")
     private String login;
     private String name;
     @PastOrPresent

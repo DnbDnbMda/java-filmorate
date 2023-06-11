@@ -17,7 +17,6 @@ import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
 @Component
 public class GenreDbStorage implements GenreStorage {
 

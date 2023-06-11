@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.model;
 
-import jdk.jshell.Snippet;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
@@ -14,16 +13,16 @@ import java.util.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class  Film {
+public class Film {
     private long id;
     @NotBlank
-    private String name; // название не может быть пустым
+    private String name;
     @NotBlank
-    @Size(max = 200) //описание должно быть не больше 200 символов
+    @Size(max = 200)
     private String description;
     private LocalDate releaseDate;
     @Positive
-    private int duration; //продолжительность фильма должна быть положительной
+    private int duration;
     @NotNull
     private MpaRating mpa;
     private final Set<Long> likes = new HashSet<>();
