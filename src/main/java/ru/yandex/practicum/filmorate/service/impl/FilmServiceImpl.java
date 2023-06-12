@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.*;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmServiceImpl implements FilmService {
 
     private final FilmStorage filmStorage;
@@ -25,19 +27,6 @@ public class FilmServiceImpl implements FilmService {
     private final LikesDbStorage likesDbStorage;
     public static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
     public static final int LENGTH_DESCRIPTION = 200;
-
-    @Autowired
-    public FilmServiceImpl(FilmStorage filmStorage,
-                           UserStorage userStorage,
-                           FilmGenreStorage filmGenreStorage, MpaStorage mpaStorage, GenreStorage genreStorage,
-                           LikesDbStorage likesDbStorage) {
-        this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
-        this.filmGenreStorage = filmGenreStorage;
-        this.mpaStorage = mpaStorage;
-        this.genreStorage = genreStorage;
-        this.likesDbStorage = likesDbStorage;
-    }
 
     @Override
     public Film addFilm(Film film) throws ValidateException {
