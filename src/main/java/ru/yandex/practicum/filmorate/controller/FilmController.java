@@ -1,84 +1,57 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import ru.yandex.practicum.filmorate.exception.UserNotFound;
-import ru.yandex.practicum.filmorate.exception.ValidEx;
+import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.servise.FilmService;
-import ru.yandex.practicum.filmorate.servise.ValidateFilm;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
-import java.util.*;
+import javax.validation.Valid;
+import java.util.Collection;
+import java.util.List;
 
-@Slf4j
 @RestController
-@AllArgsConstructor
+@RequestMapping("/films")
+@Slf4j
+@RequiredArgsConstructor
 public class FilmController {
-    private final ValidateFilm validateFilm;
-    private final InMemoryFilmStorage inMemoryFilmStorage;
+
     private final FilmService filmService;
 
-    @PostMapping("/films")
-    public Film createFilm(@RequestBody Film film) throws ValidEx {
-        if (validateFilm.validateFilmData(film)) {
-            inMemoryFilmStorage.createFilm(film);
-            log.info("Добавлен фильм");
-            return new ResponseEntity<Film>(film, HttpStatus.CREATED).getBody();
-        } else throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Ошибка сервера");
+    @PostMapping
+    public Film addFilm(@RequestBody @Valid Film film) throws ValidateException {
+        return filmService.addFilm(film);
     }
 
-    @PutMapping("/films")
-    public Film updateFilm(@RequestBody Film film) throws ValidEx {
-        if (validateFilm.validateFilmData(film)) {
-            if (!inMemoryFilmStorage.containsFilmById(film.getId())) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Ошибка сервера");
-            }
-            inMemoryFilmStorage.updateFilm(film.getId(), film);
-            log.info("Данные фильма обновлены");
-            return new ResponseEntity<Film>(film, HttpStatus.CREATED).getBody();
-        } else throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Ошибка сервера");
+    @PutMapping
+    public Film updateFilm(@RequestBody @Valid Film film) throws ValidateException {
+        return filmService.updateFilm(film);
     }
 
-    @GetMapping("/films")
-    public List<Film> getFilm() {
-        log.info("Получен запрос на получение списка фильмов");
-        return inMemoryFilmStorage.getAllFilms();
+    @GetMapping
+    public Collection<Film> getAllFilms() {
+        return filmService.getAllFilms();
     }
 
-    @GetMapping("films/{id}")
-    public Film getFilmById(@PathVariable String id) {
-        Film filmById = inMemoryFilmStorage.getFilmById(Integer.parseInt(id));
-        if (filmById == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
-        return filmById;
+    @GetMapping("/{id}")
+    public Film getFilm(@PathVariable long id) {
+        return filmService.getFilmById(id);
     }
 
-    @PutMapping(value = "/films/{id}/like/{userId}")
-    public void userSetLikeFilm(@PathVariable String id, @PathVariable String userId) throws UserNotFound {
-        filmService.userSetLikeFilm(Integer.parseInt(id), Integer.parseInt(userId));
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable long id, @PathVariable long userId) {
+        filmService.addLike(id, userId);
     }
 
-    @DeleteMapping(value = "/films/{id}/like/{userId}")
-    public void userDeleteLikeFilm(@PathVariable String id, @PathVariable String userId) throws UserNotFound {
-        filmService.userDeleteLikeFilm(Integer.parseInt(id), Integer.parseInt(userId));
+    @DeleteMapping("/{id}/like/{userId}")
+    public void deleteLike(@PathVariable long id, @PathVariable long userId) {
+        filmService.removeLike(id, userId);
     }
 
-    @GetMapping(value = {"/films/popular?count={count}", "/films/popular"})
-    @ResponseBody
-    public List<Film> getPopularFilms(@RequestParam(required = false) String count) {
-        int countOfPopularFilms = 0;
-        if (count == null) {
-            countOfPopularFilms = 10;
-        } else {
-            countOfPopularFilms = Integer.parseInt(count);
-        }
-        return filmService.getPopularFilms(countOfPopularFilms);
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
+        return filmService.getMostPopularFilms(count);
     }
 }
 
