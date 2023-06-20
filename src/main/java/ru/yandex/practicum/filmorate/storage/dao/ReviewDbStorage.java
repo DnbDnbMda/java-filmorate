@@ -18,14 +18,14 @@ import java.util.Objects;
 @AllArgsConstructor
 public class ReviewDbStorage implements ReviewStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final String SELECT_PATTERN = "SELECT REVIEWS.*, " +
+    private final String SELECTION_STRING = "SELECT REVIEWS.*, " +
             "(SELECT count(*) FROM REVIEW_LIKES WHERE REVIEW_LIKES.REVIEW_ID = REVIEWS.REVIEW_ID AND REVIEW_LIKES.IS_USEFUL = true) - " +
             "(SELECT count(*) FROM REVIEW_LIKES WHERE REVIEW_LIKES.REVIEW_ID = REVIEWS.REVIEW_ID AND REVIEW_LIKES.IS_USEFUL = false) AS USEFUL " +
             "FROM REVIEWS AS REVIEWS ";
 
     @Override
     public Collection<Review> getAllReviews() {
-        String sql = SELECT_PATTERN +
+        String sql = SELECTION_STRING +
                 "ORDER BY USEFUL DESC, REVIEW_ID ASC;";
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> makeReview(rs));
@@ -33,7 +33,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Review findReview(long reviewId) {
-        String sql = SELECT_PATTERN +
+        String sql = SELECTION_STRING +
                 "WHERE REVIEWS.REVIEW_ID = ? " +
                 "ORDER BY USEFUL DESC, REVIEW_ID ASC " +
                 "LIMIT 1;";
@@ -43,7 +43,7 @@ public class ReviewDbStorage implements ReviewStorage {
 
     @Override
     public Collection<Review> getReviewByFilm(Long filmId, Integer count) {
-        StringBuilder stringBuilder = new StringBuilder().append(SELECT_PATTERN);
+        StringBuilder stringBuilder = new StringBuilder().append(SELECTION_STRING);
         if (!Objects.isNull(filmId)) {
             stringBuilder.append("WHERE REVIEWS.FILM_ID = ? ");
         }
