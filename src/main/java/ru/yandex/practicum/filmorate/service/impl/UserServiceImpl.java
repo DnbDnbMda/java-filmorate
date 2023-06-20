@@ -60,6 +60,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void deleteUser(long id) {
+        userStorage.deleteUser(id);
+    }
+
+    @Override
     public void addToFriend(long friendId, long userId) {
         Set<Long> usersFriends = getUserById(userId).getFriends();
         Set<Long> friendsFriends = getUserById(friendId).getFriends();
@@ -103,6 +108,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllFriends(long id) {
+        userStorage.getUserById(id);
         return getUsersByIds(friendshipDbStorage.getAllFriendsByUser(id));
     }
 
