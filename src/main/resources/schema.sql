@@ -43,7 +43,7 @@ create table IF NOT EXISTS FILM_DIRECTOR (
     film_id INTEGER NOT NULL,
     PRIMARY KEY(director_id, film_id),
     FOREIGN KEY(film_id) REFERENCES films(film_id),
-    FOREIGN KEY(director_id) REFERENCES directors(id),
+    FOREIGN KEY(director_id) REFERENCES directors(id)
 );
 
 DROP TABLE IF EXISTS GENRES CASCADE;

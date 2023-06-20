@@ -22,7 +22,7 @@ public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final FilmGenreStorage filmGenreStorage;
-    private final MpaStorage mpaStorage;
+    private final MpaStorage mpaStorage; // похоже это поле не используется, предлагаю удалить
     private final GenreStorage genreStorage;
     private final LikesDbStorage likesDbStorage;
     public static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
@@ -35,7 +35,7 @@ public class FilmServiceImpl implements FilmService {
         if (film.getGenres() != null) {
             filmGenreStorage.removeGenreFromFilm(film.getId());
             genreStorage.setGenresToFilms(film.getId(), film.getGenres());
-        }
+        } //добавить режиссеров
         return film;
     }
 
@@ -46,7 +46,7 @@ public class FilmServiceImpl implements FilmService {
         filmGenreStorage.removeGenreFromFilm(film.getId());
         if (film.getGenres() != null) {
             genreStorage.setGenresToFilms(film.getId(), film.getGenres());
-        }
+        }//добавить режиссеров
         return film;
     }
 
@@ -63,7 +63,7 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public Film getFilmById(long id) {
         Film film = filmStorage.getFilmById(id);
-        Map<Long, Film> filmsMap = new HashMap<>();
+        Map<Long, Film> filmsMap = new HashMap<>(); //зачем тут мапа
         filmsMap.put(film.getId(), film);
         return genreStorage.getGenresForFilm(filmsMap).get(film.getId());
     }

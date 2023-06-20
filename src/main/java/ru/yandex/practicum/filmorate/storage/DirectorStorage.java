@@ -1,10 +1,10 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.storage;
 
 import ru.yandex.practicum.filmorate.model.Director;
 
 import java.util.List;
 
-public interface DirectorService {
+public interface DirectorStorage {
 
     public Director addDirector(Director director);
 
@@ -12,7 +12,7 @@ public interface DirectorService {
 
     public List<Director> getAllDirectors();
 
-    Director getDirectorById(int id);
+    public Director getDirectorById(long id);
 
-    void deleteDirector(int id);
+    public void deleteDirector(long id);
 }
