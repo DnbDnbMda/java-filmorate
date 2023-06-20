@@ -18,7 +18,7 @@ import java.util.Objects;
 @AllArgsConstructor
 public class ReviewDbStorage implements ReviewStorage {
     private final JdbcTemplate jdbcTemplate;
-    private final String SELECTION_STRING = "SELECT REVIEWS.*, " +
+    private static final String SELECTION_STRING = "SELECT REVIEWS.*, " +
             "(SELECT count(*) FROM REVIEW_LIKES WHERE REVIEW_LIKES.REVIEW_ID = REVIEWS.REVIEW_ID AND REVIEW_LIKES.IS_USEFUL = true) - " +
             "(SELECT count(*) FROM REVIEW_LIKES WHERE REVIEW_LIKES.REVIEW_ID = REVIEWS.REVIEW_ID AND REVIEW_LIKES.IS_USEFUL = false) AS USEFUL " +
             "FROM REVIEWS AS REVIEWS ";
