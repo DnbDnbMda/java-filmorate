@@ -25,6 +25,7 @@ public class FilmServiceImpl implements FilmService {
     private final MpaStorage mpaStorage; // похоже это поле не используется, предлагаю удалить
     private final GenreStorage genreStorage;
     private final LikesDbStorage likesDbStorage;
+    private final DirectorStorage directorStorage;
     public static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
     public static final int LENGTH_DESCRIPTION = 200;
 
@@ -35,7 +36,10 @@ public class FilmServiceImpl implements FilmService {
         if (film.getGenres() != null) {
             filmGenreStorage.removeGenreFromFilm(film.getId());
             genreStorage.setGenresToFilms(film.getId(), film.getGenres());
-        } //добавить режиссеров
+        }
+        if (film.getDirectors() != null) {
+            directorStorage.addDirectorsToFilm(film);
+        }
         return film;
     }
 
@@ -46,13 +50,19 @@ public class FilmServiceImpl implements FilmService {
         filmGenreStorage.removeGenreFromFilm(film.getId());
         if (film.getGenres() != null) {
             genreStorage.setGenresToFilms(film.getId(), film.getGenres());
-        }//добавить режиссеров
+        }
+        directorStorage.deleteDirectorsFromFilm(film);
+        if (film.getDirectors() != null) {
+            directorStorage.addDirectorsToFilm(film);
+        }
         return film;
     }
 
     @Override
     public List<Film> getAllFilms() {
         List<Film> films = filmStorage.getAllFilms();
+        films.stream()
+                .forEach(film -> film.getDirectors().addAll(directorStorage.getDirectorsForFilm(film.getId())));
         Map<Long, Film> filmsMap = new HashMap<>();
         for (Film film : films) {
             filmsMap.put(film.getId(), film);
@@ -63,7 +73,8 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public Film getFilmById(long id) {
         Film film = filmStorage.getFilmById(id);
-        Map<Long, Film> filmsMap = new HashMap<>(); //зачем тут мапа
+        film.getDirectors().addAll(directorStorage.getDirectorsForFilm(film.getId()));
+        Map<Long, Film> filmsMap = new HashMap<>();
         filmsMap.put(film.getId(), film);
         return genreStorage.getGenresForFilm(filmsMap).get(film.getId());
     }
@@ -99,6 +110,17 @@ public class FilmServiceImpl implements FilmService {
             filmsMap.put(film.getId(), film);
         }
         return new ArrayList<>(genreStorage.getGenresForFilm(filmsMap).values());
+    }
+
+    @Override
+    public List<Film> getFilmsByDirector(int directorId, String sortBy) {
+        List<Film> films = filmStorage.getFilmsByDirector(directorId, sortBy);
+        films.stream()
+                .forEach(film -> {
+                    film.getDirectors().addAll(directorStorage.getDirectorsForFilm(film.getId()));
+                    film.getGenres().addAll(genreStorage.getGenreByFilm(film.getId()));
+                });
+        return films;
     }
 
     public void validateFilms(Film film) throws ValidateException {

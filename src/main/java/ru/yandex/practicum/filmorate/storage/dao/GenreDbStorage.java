@@ -88,8 +88,10 @@ public class GenreDbStorage implements GenreStorage {
         return films;
     }
 
-    private Genre mapToRowGenre(ResultSet rs) throws SQLException {
+    public Genre mapToRowGenre(ResultSet rs) throws SQLException {
         return new Genre(rs.getInt("genre_id"),
                 rs.getString("name"));
     }
+
+
 }

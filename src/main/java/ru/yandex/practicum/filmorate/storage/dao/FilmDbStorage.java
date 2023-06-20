@@ -10,14 +10,15 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.MpaRating;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -28,12 +29,16 @@ public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final GenreStorage genreStorage;
     private final FilmGenreDbStorage filmGenreDbStorage;
+    private final MpaDbStorage mpaDbStorage;
+    private final DirectorStorage directorStorage;
 
-    public FilmDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate, GenreStorage genreStorage, FilmGenreDbStorage filmGenreDbStorage) {
+    public FilmDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate, GenreStorage genreStorage, FilmGenreDbStorage filmGenreDbStorage, MpaDbStorage mpaDbStorage, DirectorStorage directorStorage) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.jdbcTemplate = jdbcTemplate;
         this.genreStorage = genreStorage;
         this.filmGenreDbStorage = filmGenreDbStorage;
+        this.mpaDbStorage = mpaDbStorage;
+        this.directorStorage = directorStorage;
     }
 
     @Override
@@ -96,6 +101,27 @@ public class FilmDbStorage implements FilmStorage {
                 "LEFT JOIN (SELECT FILM_ID, COUNT(USER_ID) AS all_likes FROM LIKES GROUP BY FILM_ID ORDER BY all_likes) " +
                 "as toplist ON f.FILM_ID = toplist.FILM_ID ORDER BY toplist.all_likes DESC LIMIT ?";
         return jdbcTemplate.query(sqlPopularFilms, (rs, rowNum) -> mapRowToFilm(rs), count);
+    }
+
+    @Override
+    public List<Film> getFilmsByDirector(int directorId, String sortBy) {
+        directorStorage.getDirectorById(directorId);
+        if (sortBy.equals("year")) {
+            String sql = "SELECT f.* FROM films as f " +
+                    "WHERE f.film_id IN (" +
+                    "SELECT fd.film_id FROM film_director AS fd where fd.director_id = ?)" +
+                    "ORDER BY f.release_date ASC";
+            List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToFilm(rs), directorId);
+            return films;
+        }
+            String sql = "SELECT f.*, COUNT(l.film_id) rate " +
+                    "FROM films as f " +
+                    "LEFT JOIN likes l on f.film_id = l.film_id " +
+                    "WHERE f.film_id IN (" +
+                    "SELECT fd.film_id FROM film_director AS fd where fd.director_id = ?) " +
+                    "GROUP BY f.film_id ORDER BY rate DESC";
+            List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToFilm(rs), directorId);
+            return films;
     }
 
     @Override

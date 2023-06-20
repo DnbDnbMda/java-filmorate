@@ -43,7 +43,6 @@ public class MpaDbStorage implements MpaStorage {
         return MpaRating.builder()
                 .id(id)
                 .name(name)
-                .description(description)
                 .build();
     }
 }

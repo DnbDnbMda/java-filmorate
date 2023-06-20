@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Director;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.sql.ResultSet;
@@ -72,11 +73,32 @@ public class DirectorDbStorage implements DirectorStorage {
     @Override
     public void deleteDirector(long id) {
         getDirectorById(id); //проверка наличия директора в БД, если такого айди нет, кидается искл
-        String sqlFilmDirector = "delete * from film_director where director_id = ?";
+        String sqlFilmDirector = "delete from film_director where director_id = ?";
         jdbcTemplate.update(sqlFilmDirector, id);
-        String sqlDirectors = "delete * from directors where id = ?";
+        String sqlDirectors = "delete from directors where id = ?";
         jdbcTemplate.update(sqlDirectors, id);
         log.info("Директор id = {} удален", id);
+    }
+
+    @Override
+    public List<Director> getDirectorsForFilm(long filmId) {
+        String sqlDirectors = "select d.* from directors as d where d.id in " +
+                "(select director_id from film_director where film_id = ?) group by d.id";
+        return jdbcTemplate.query(sqlDirectors, (resultSet, rowNum) -> makeDirector(resultSet), filmId);
+    }
+
+    @Override
+    public void addDirectorsToFilm(Film film) {
+        String sql = "insert into film_director(director_id, film_id) values(?, ?)";
+        film.getDirectors().stream()
+                .filter(director -> getDirectorById(director.getId()) != null) //проверка существования режиссера в БД
+                .forEach(director -> jdbcTemplate.update(sql, director.getId(), film.getId()));
+    }
+
+    @Override
+    public void deleteDirectorsFromFilm(Film film) {
+        String sqlDelete = "delete from film_director where film_id = ?;";
+        jdbcTemplate.update(sqlDelete, film.getId());
     }
 
     private Director makeDirector(ResultSet rs) throws SQLException {
