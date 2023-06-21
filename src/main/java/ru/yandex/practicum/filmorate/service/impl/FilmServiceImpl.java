@@ -25,7 +25,6 @@ public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final FilmGenreStorage filmGenreStorage;
-    private final MpaStorage mpaStorage; // похоже это поле не используется, предлагаю удалить
     private final GenreStorage genreStorage;
     private final LikesDbStorage likesDbStorage;
     private final DirectorStorage directorStorage;

@@ -39,21 +39,11 @@ class FilmorateApplicationTests {
     private final LikesDbStorage likesDbStorage;
     private final FriendshipDbStorage friendshipDbStorage;
     private final DirectorDbStorage directorDbStorage;
-    private final JdbcTemplate jdbcTemplate;
     private final UserController userController;
     private final FilmController filmController;
     private final MpaController mpaController;
     private final ReviewController reviewController;
     private final FilmServiceImpl filmService;
-
-//    @AfterEach
-//    public void deleteDbStorages() {
-//        JdbcTestUtils.deleteFromTables(jdbcTemplate,
-//                "users", "films", "friendship", "film_genre", "likes");
-//        jdbcTemplate.update("ALTER TABLE USERS ALTER COLUMN user_id RESTART WITH 1");
-//        jdbcTemplate.update("ALTER TABLE FILMS ALTER COLUMN film_id RESTART WITH 1");
-//        jdbcTemplate.update("ALTER TABLE DIRECTORS ALTER COLUMN id RESTART WITH 1");
-//    }
 
     @Test
     public void testGetUserById() {

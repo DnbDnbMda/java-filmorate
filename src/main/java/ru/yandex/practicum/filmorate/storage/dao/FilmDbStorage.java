@@ -16,7 +16,6 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,7 @@ public class FilmDbStorage implements FilmStorage {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final JdbcTemplate jdbcTemplate;
-    private final GenreStorage genreStorage; //убрать поля с другими хранилищами?
+    private final GenreStorage genreStorage;
     private final FilmGenreDbStorage filmGenreDbStorage;
     private final MpaDbStorage mpaDbStorage;
 
@@ -129,35 +128,13 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Film mapRowToFilm(ResultSet rs) throws SQLException {
-        //а можно так записать метод
-//        return Film.builder()
-//                .id(rs.getLong("film_id"))
-//                .name(rs.getString("name"))
-//                .description(rs.getString("description"))
-//                .releaseDate(rs.getDate("release_date").toLocalDate())
-//                .duration(rs.getInt("duration"))
-//                .mpa(new MpaRating(rs.getInt("mpa_id"), rs.getString("MPA_RATING.NAME"), null)) //поле description выглядит излишним
-//                .build();
-        long id = rs.getLong("film_id");
-        String name = rs.getString("name");
-        String description = rs.getString("description");
-        LocalDate releaseDate = rs.getDate("release_date").toLocalDate();
-        int duration = rs.getInt("duration");
-        int mpaId = rs.getInt("mpa_id");
-        String mpaName = rs.getString("MPA_RATING.NAME");
-
-        MpaRating mpa = MpaRating.builder()
-                .id(mpaId)
-                .name(mpaName)
-                .build();
-
         return Film.builder()
-                .id(id)
-                .name(name)
-                .description(description)
-                .releaseDate(releaseDate)
-                .duration(duration)
-                .mpa(mpa)
+                .id(rs.getLong("film_id"))
+                .name(rs.getString("name"))
+                .description(rs.getString("description"))
+                .releaseDate(rs.getDate("release_date").toLocalDate())
+                .duration(rs.getInt("duration"))
+                .mpa(new MpaRating(rs.getInt("mpa_id"), rs.getString("MPA_RATING.NAME"), null))
                 .build();
     }
 }

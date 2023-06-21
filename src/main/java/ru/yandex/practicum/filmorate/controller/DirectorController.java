@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -11,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/directors")
-@Slf4j
 public class DirectorController {
 
     private final DirectorService directorService;
