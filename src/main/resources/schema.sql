@@ -42,8 +42,8 @@ create table IF NOT EXISTS FILM_DIRECTOR (
     director_id INTEGER NOT NULL,
     film_id INTEGER NOT NULL,
     PRIMARY KEY(director_id, film_id),
-    FOREIGN KEY(film_id) REFERENCES films(film_id),
-    FOREIGN KEY(director_id) REFERENCES directors(id)
+    FOREIGN KEY(film_id) REFERENCES films(film_id) on delete cascade,
+    FOREIGN KEY(director_id) REFERENCES directors(id) on delete cascade
 );
 
 DROP TABLE IF EXISTS GENRES CASCADE;
@@ -71,6 +71,7 @@ create table IF NOT EXISTS LIKES
 (
     FILM_ID int NOT NULL,
     USER_ID int NOT NULL,
+    PRIMARY KEY(user_id, film_id),
     constraint FK_LIKES_FILMID
         foreign key (FILM_ID) references FILMS (FILM_ID)
             on delete cascade,

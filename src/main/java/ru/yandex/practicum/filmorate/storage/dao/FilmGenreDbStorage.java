@@ -2,11 +2,7 @@ package ru.yandex.practicum.filmorate.storage.dao;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
-
-import java.util.List;
 
 @Component
 public class FilmGenreDbStorage implements FilmGenreStorage {

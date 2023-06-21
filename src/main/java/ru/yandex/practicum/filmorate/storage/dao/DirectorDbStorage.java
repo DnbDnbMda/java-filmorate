@@ -23,11 +23,9 @@ import java.util.List;
 @Primary
 public class DirectorDbStorage implements DirectorStorage {
 
-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final JdbcTemplate jdbcTemplate;
 
-    public DirectorDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate) {
-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+    public DirectorDbStorage(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -63,8 +61,7 @@ public class DirectorDbStorage implements DirectorStorage {
     public Director getDirectorById(long id) {
         String sql = "SELECT * FROM directors WHERE id = ?;";
         try {
-            Director director = jdbcTemplate.queryForObject(sql, ((rs, rowNum) -> makeDirector(rs)), id);
-            return director;
+            return jdbcTemplate.queryForObject(sql, ((rs, rowNum) -> makeDirector(rs)), id);
         } catch (EmptyResultDataAccessException exception) {
             throw new NotFoundException("Director not found");
         }

@@ -9,7 +9,7 @@ import javax.validation.constraints.NotBlank;
 @Builder
 public class Director {
 
-    private int id;
+    private Integer id;
     @NotBlank
     private String name;
 }

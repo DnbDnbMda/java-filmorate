@@ -10,12 +10,13 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.DirectorStorage;
+import ru.yandex.practicum.filmorate.model.MpaRating;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,18 +28,16 @@ public class FilmDbStorage implements FilmStorage {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final JdbcTemplate jdbcTemplate;
-    private final GenreStorage genreStorage;
+    private final GenreStorage genreStorage; //убрать поля с другими хранилищами?
     private final FilmGenreDbStorage filmGenreDbStorage;
     private final MpaDbStorage mpaDbStorage;
-    private final DirectorStorage directorStorage;
 
-    public FilmDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate, GenreStorage genreStorage, FilmGenreDbStorage filmGenreDbStorage, MpaDbStorage mpaDbStorage, DirectorStorage directorStorage) {
+    public FilmDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate, GenreStorage genreStorage, FilmGenreDbStorage filmGenreDbStorage, MpaDbStorage mpaDbStorage) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.jdbcTemplate = jdbcTemplate;
         this.genreStorage = genreStorage;
         this.filmGenreDbStorage = filmGenreDbStorage;
         this.mpaDbStorage = mpaDbStorage;
-        this.directorStorage = directorStorage;
     }
 
     @Override
@@ -107,21 +106,21 @@ public class FilmDbStorage implements FilmStorage {
     public List<Film> getFilmsByDirector(int directorId, String sortBy) {
         directorStorage.getDirectorById(directorId);
         if (sortBy.equals("year")) {
-            String sql = "SELECT f.* FROM films as f " +
+            String sql = "SELECT f.*, mr.NAME FROM films as f " +
+                    "JOIN MPA_RATING AS mr ON f.MPA_ID = mr.MPA_ID " +
                     "WHERE f.film_id IN (" +
                     "SELECT fd.film_id FROM film_director AS fd where fd.director_id = ?)" +
-                    "ORDER BY f.release_date ASC";
-            List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToFilm(rs), directorId);
-            return films;
+                    "ORDER BY f.release_date";
+            return jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToFilm(rs), directorId);
         }
-            String sql = "SELECT f.*, COUNT(l.film_id) rate " +
-                    "FROM films as f " +
-                    "LEFT JOIN likes l on f.film_id = l.film_id " +
-                    "WHERE f.film_id IN (" +
-                    "SELECT fd.film_id FROM film_director AS fd where fd.director_id = ?) " +
-                    "GROUP BY f.film_id ORDER BY rate DESC";
-            List<Film> films = jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToFilm(rs), directorId);
-            return films;
+        String sql = "SELECT f.*, COUNT(l.user_id) rate, mr.name " +
+                "FROM films as f " +
+                "JOIN MPA_RATING AS mr ON f.MPA_ID = mr.MPA_ID " +
+                "LEFT JOIN likes l on f.film_id = l.film_id " +
+                "WHERE f.film_id IN (" +
+                "SELECT fd.film_id FROM film_director AS fd where fd.director_id = ?) " +
+                "GROUP BY f.film_id ORDER BY rate DESC";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToFilm(rs), directorId);
     }
 
     @Override
@@ -131,6 +130,15 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Film mapRowToFilm(ResultSet rs) throws SQLException {
+        //а можно так записать метод
+//        return Film.builder()
+//                .id(rs.getLong("film_id"))
+//                .name(rs.getString("name"))
+//                .description(rs.getString("description"))
+//                .releaseDate(rs.getDate("release_date").toLocalDate())
+//                .duration(rs.getInt("duration"))
+//                .mpa(new MpaRating(rs.getInt("mpa_id"), rs.getString("MPA_RATING.NAME"), null)) //поле description выглядит излишним
+//                .build();
         long id = rs.getLong("film_id");
         String name = rs.getString("name");
         String description = rs.getString("description");

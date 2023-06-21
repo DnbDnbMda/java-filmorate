@@ -114,6 +114,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getFilmsByDirector(int directorId, String sortBy) {
+        directorStorage.getDirectorById(directorId);
         List<Film> films = filmStorage.getFilmsByDirector(directorId, sortBy);
         films.stream()
                 .forEach(film -> {

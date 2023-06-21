@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.jdbc.JdbcTestUtils;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.MpaController;
@@ -14,6 +15,7 @@ import ru.yandex.practicum.filmorate.controller.ReviewController;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl;
 import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dao.*;
 
@@ -29,7 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class FilmorateApplicationTests {
+
     private final UserDbStorage userStorage;
     private final MpaDbStorage mpaDbStorage;
     private final FilmDbStorage filmDbStorage;
@@ -37,20 +41,22 @@ class FilmorateApplicationTests {
     private final FilmGenreStorage filmGenreStorage;
     private final LikesDbStorage likesDbStorage;
     private final FriendshipDbStorage friendshipDbStorage;
+    private final DirectorDbStorage directorDbStorage;
     private final JdbcTemplate jdbcTemplate;
     private final UserController userController;
     private final FilmController filmController;
     private final MpaController mpaController;
     private final ReviewController reviewController;
+    private final FilmServiceImpl filmService;
 
-    @AfterEach
-    public void deleteDbStorages() {
-        JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                "users", "films", "friendship", "film_genre", "likes", "reviews", "review_likes");
-        jdbcTemplate.update("ALTER TABLE USERS ALTER COLUMN user_id RESTART WITH 1");
-        jdbcTemplate.update("ALTER TABLE FILMS ALTER COLUMN film_id RESTART WITH 1");
-        jdbcTemplate.update("ALTER TABLE REVIEWS ALTER COLUMN REVIEW_ID RESTART WITH 1");
-    }
+//    @AfterEach
+//    public void deleteDbStorages() {
+//        JdbcTestUtils.deleteFromTables(jdbcTemplate,
+//                "users", "films", "friendship", "film_genre", "likes");
+//        jdbcTemplate.update("ALTER TABLE USERS ALTER COLUMN user_id RESTART WITH 1");
+//        jdbcTemplate.update("ALTER TABLE FILMS ALTER COLUMN film_id RESTART WITH 1");
+//        jdbcTemplate.update("ALTER TABLE DIRECTORS ALTER COLUMN id RESTART WITH 1");
+//    }
 
     @Test
     public void testGetUserById() {
@@ -555,6 +561,76 @@ class FilmorateApplicationTests {
         reviewController.deleteDislike(review1.getReviewId(), user1.getId());
 
         assertEquals(-1, reviewController.getReview(review1.getReviewId()).getUseful());
+    }
+
+    @Test
+    public void addGetByIdUpdateDirector() {
+        Director director = Director.builder().name("Director").build();
+        Director addedDirector = directorDbStorage.addDirector(director);
+        assertNotNull(addedDirector);
+        assertEquals(1, addedDirector.getId());
+        assertEquals(director.getName(), addedDirector.getName());
+
+        Director recievedDirector = directorDbStorage.getDirectorById(addedDirector.getId());
+        assertNotNull(recievedDirector);
+        assertEquals(director.getName(), recievedDirector.getName());
+
+        Director newDirector = Director.builder().id(1).name("New Director").build();
+        Director updatedDirector = directorDbStorage.updateDirector(newDirector);
+
+        assertNotNull(updatedDirector);
+        assertEquals(newDirector.getName(), updatedDirector.getName());
+    }
+
+    @Test
+    public void getAllDirectorsAndDelete() {
+        Director director = Director.builder().name("Director").build();
+        Director director1 = directorDbStorage.addDirector(director);
+        Director newDirector = Director.builder().name("New Director").build();
+        Director director2 = directorDbStorage.addDirector(newDirector);
+
+        List<Director> directors = directorDbStorage.getAllDirectors();
+        assertNotNull(directors);
+        assertEquals(2, directors.size());
+        assertEquals(director1.getName(), directors.get(0).getName());
+
+        directorDbStorage.deleteDirector(1);
+        List<Director> directorsAfterDelete = directorDbStorage.getAllDirectors();
+        assertNotNull(directorsAfterDelete);
+        assertEquals(1, directorsAfterDelete.size());
+        assertEquals(director2.getName(), directorsAfterDelete.get(0).getName());
+    }
+
+    @Test
+    public void getFilmsByDirector() {
+        Director director = Director.builder().name("Director").build();
+        Director director1 = directorDbStorage.addDirector(director);
+        Film film1 = Film.builder().name("Хороший фильм").description("Описание хорошего фильма")
+                .releaseDate(LocalDate.of(1999, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).build()).build();
+        film1.getDirectors().add(director1);
+        Film film2 = Film.builder().name("Новый фильм").description("Описание хорошего фильма")
+                .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).build()).build();
+        film2.getDirectors().add(director1);
+
+        Film addedFilm1 = filmService.addFilm(film1);
+        Film addedFilm2 = filmService.addFilm(film2);
+
+        List<Film> filmsByYear = filmDbStorage.getFilmsByDirector(director1.getId(), "year");
+        assertNotNull(filmsByYear);
+        assertEquals(2, filmsByYear.size());
+        assertEquals(film1.getName(), filmsByYear.get(0).getName());
+
+        User user = User.builder().email("email@mail.ru").login("login1").name("name1")
+                .birthday(LocalDate.of(1991, 7, 11)).build();
+        User addedUser = userStorage.addUser(user);
+        likesDbStorage.addLike(addedFilm2.getId(), addedUser.getId());
+
+        List<Film> filmsByLikes = filmDbStorage.getFilmsByDirector(director1.getId(), "likes");
+        assertNotNull(filmsByLikes);
+        assertEquals(2, filmsByLikes.size());
+        assertEquals(film2.getName(), filmsByLikes.get(0).getName());
     }
 }
 
