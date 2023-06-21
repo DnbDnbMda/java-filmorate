@@ -350,6 +350,29 @@ class FilmorateApplicationTests {
                 .isNotNull()
                 .isEqualTo(Collections.EMPTY_LIST);
     }
+
+    @Test
+    public void testDeleteUser() {
+        User user = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser = userStorage.addUser(user);
+
+        userStorage.deleteUser(addUser.getId());
+
+        assertEquals(userStorage.getAllUsers().size(), 0);
+    }
+
+    @Test
+    public void testDeleteFilm() {
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма")
+                .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).build()).build();
+        Film addFilm1 = filmDbStorage.addFilm(film1);
+
+        filmDbStorage.deleteFilm(addFilm1.getId());
+
+        assertEquals(filmDbStorage.getAllFilms().size(), 0);
+    }
 }
 
 
