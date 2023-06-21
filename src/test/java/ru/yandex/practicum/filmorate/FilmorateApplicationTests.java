@@ -8,6 +8,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.jdbc.JdbcTestUtils;
+import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.controller.MpaController;
+import ru.yandex.practicum.filmorate.controller.ReviewController;
+import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dao.*;
@@ -25,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @AutoConfigureTestDatabase
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class FilmorateApplicationTests {
-
     private final UserDbStorage userStorage;
     private final MpaDbStorage mpaDbStorage;
     private final FilmDbStorage filmDbStorage;
@@ -34,13 +38,18 @@ class FilmorateApplicationTests {
     private final LikesDbStorage likesDbStorage;
     private final FriendshipDbStorage friendshipDbStorage;
     private final JdbcTemplate jdbcTemplate;
+    private final UserController userController;
+    private final FilmController filmController;
+    private final MpaController mpaController;
+    private final ReviewController reviewController;
 
     @AfterEach
     public void deleteDbStorages() {
         JdbcTestUtils.deleteFromTables(jdbcTemplate,
-                "users", "films", "friendship", "film_genre", "likes");
+                "users", "films", "friendship", "film_genre", "likes", "reviews", "review_likes");
         jdbcTemplate.update("ALTER TABLE USERS ALTER COLUMN user_id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE FILMS ALTER COLUMN film_id RESTART WITH 1");
+        jdbcTemplate.update("ALTER TABLE REVIEWS ALTER COLUMN REVIEW_ID RESTART WITH 1");
     }
 
     @Test
@@ -406,6 +415,146 @@ class FilmorateApplicationTests {
         assertEquals(0, genres.size());
         assertEquals(0, likesFilm.size());
         assertEquals(filmDbStorage.getAllFilms().size(), 0);
+    }
+
+    @Test
+    public void testAddReview() {
+        Film film = filmController.addFilm(Film.builder().name("Film name").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        User user = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+        Review review = reviewController.addReview(Review.builder().content("Good review").isPositive(true).userId(user.getId()).filmId(film.getId()).build());
+
+        assertEquals(1, review.getReviewId());
+        assertEquals(0, review.getUseful());
+    }
+
+    @Test
+    public void testGetReview() {
+        Film film = filmController.addFilm(Film.builder().name("Film name").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        User user = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+        Review review = reviewController.addReview(Review.builder().content("Good review").isPositive(true).userId(user.getId()).filmId(film.getId()).build());
+
+        assertEquals(1, reviewController.getReview(review.getReviewId()).getReviewId());
+        assertThrows(NotFoundException.class, () -> reviewController.getReview(-1));
+    }
+
+    @Test
+    public void testGetReviewByFilm() {
+        Film film = filmController.addFilm(Film.builder().name("Film name").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        User user1 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+        reviewController.addReview(Review.builder().content("Good review").isPositive(true).userId(user1.getId()).filmId(film.getId()).build());
+
+        User user2 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+        reviewController.addReview(Review.builder().content("Good review").isPositive(true).userId(user2.getId()).filmId(film.getId()).build());
+
+        assertEquals(2, reviewController.getReviewByFilm(film.getId(), 2).size());
+        assertEquals(2, reviewController.getReviewByFilm(null, null).size());
+        assertEquals(1, reviewController.getReviewByFilm(null, 1).size());
+    }
+
+    @Test
+    public void testUpdateReview() {
+        Film film = filmController.addFilm(Film.builder().name("Film name").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        User user = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+        Review review1 = reviewController.addReview(Review.builder().content("Good review").isPositive(true).userId(user.getId()).filmId(film.getId()).build());
+
+        review1.setContent("Bad review");
+        review1.setIsPositive(false);
+        review1.setUserId(333L);
+        review1.setFilmId(444L);
+
+        Review review2 = reviewController.updateReview(review1);
+
+        assertEquals(review1.getReviewId(), review2.getReviewId());
+        assertEquals(review2.getContent(), review1.getContent());
+        assertEquals(review2.getIsPositive(), review1.getIsPositive());
+        assertNotEquals(review2.getUserId(), review1.getUserId());
+        assertNotEquals(review2.getFilmId(), review1.getFilmId());
+    }
+
+    @Test
+    public void testAddReviewLike() {
+        Film film = filmController.addFilm(Film.builder().name("Film name").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        User user1 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+        Review review1 = reviewController.addReview(Review.builder().content("Good review").isPositive(true).userId(user1.getId()).filmId(film.getId()).build());
+        User user2 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+
+        reviewController.addLike(review1.getReviewId(), user1.getId());
+
+        assertEquals(1, reviewController.getReview(review1.getReviewId()).getUseful());
+
+        reviewController.addLike(review1.getReviewId(), user2.getId());
+
+        assertEquals(2, reviewController.getReview(review1.getReviewId()).getUseful());
+    }
+
+    @Test
+    public void testAddReviewDislike() {
+        Film film = filmController.addFilm(Film.builder().name("Film name").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        User user1 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+        Review review1 = reviewController.addReview(Review.builder().content("Good review").isPositive(true).userId(user1.getId()).filmId(film.getId()).build());
+        User user2 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+        User user3 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+
+        reviewController.addDislike(review1.getReviewId(), user1.getId());
+
+        assertEquals(-1, reviewController.getReview(review1.getReviewId()).getUseful());
+
+        reviewController.addDislike(review1.getReviewId(), user2.getId());
+
+        assertEquals(-2, reviewController.getReview(review1.getReviewId()).getUseful());
+
+        reviewController.addLike(review1.getReviewId(), user3.getId());
+
+        assertEquals(-1, reviewController.getReview(review1.getReviewId()).getUseful());
+    }
+
+    @Test
+    public void testDeleteReview() {
+        Film film1 = filmController.addFilm(Film.builder().name("Film name").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        Film film2 = filmController.addFilm(Film.builder().name("Film name").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        User user = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+        Review review1 = reviewController.addReview(Review.builder().content("Good review").isPositive(true).userId(user.getId()).filmId(film1.getId()).build());
+        reviewController.addReview(Review.builder().content("Good review").isPositive(true).userId(user.getId()).filmId(film2.getId()).build());
+
+        assertEquals(2, reviewController.getReviewByFilm(null, null).size());
+
+        reviewController.deleteReview(review1.getReviewId());
+
+        assertEquals(1, reviewController.getReviewByFilm(null, null).size());
+    }
+
+    @Test
+    public void testDeleteReviewLike() {
+        Film film = filmController.addFilm(Film.builder().name("Film name").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        User user1 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+        Review review1 = reviewController.addReview(Review.builder().content("Good review").isPositive(true).userId(user1.getId()).filmId(film.getId()).build());
+        User user2 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+
+        reviewController.addLike(review1.getReviewId(), user1.getId());
+        reviewController.addLike(review1.getReviewId(), user2.getId());
+
+        assertEquals(2, reviewController.getReview(review1.getReviewId()).getUseful());
+
+        reviewController.deleteLike(review1.getReviewId(), user1.getId());
+
+        assertEquals(1, reviewController.getReview(review1.getReviewId()).getUseful());
+    }
+
+    @Test
+    public void testDeleteReviewDislike() {
+        Film film = filmController.addFilm(Film.builder().name("Film name").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        User user1 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+        Review review1 = reviewController.addReview(Review.builder().content("Good review").isPositive(true).userId(user1.getId()).filmId(film.getId()).build());
+        User user2 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+
+        reviewController.addDislike(review1.getReviewId(), user1.getId());
+        reviewController.addDislike(review1.getReviewId(), user2.getId());
+
+        assertEquals(-2, reviewController.getReview(review1.getReviewId()).getUseful());
+
+        reviewController.deleteDislike(review1.getReviewId(), user1.getId());
+
+        assertEquals(-1, reviewController.getReview(review1.getReviewId()).getUseful());
     }
 }
 
