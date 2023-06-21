@@ -69,6 +69,11 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
+    public void deleteFilm(long id) {
+        filmStorage.deleteFilm(id);
+    }
+
+    @Override
     public void addLike(long filmId, long userId) {
         getFilmById(filmId);
         userStorage.getUserById(userId);
@@ -88,7 +93,12 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getMostPopularFilms(int count) {
-        return filmStorage.getMostPopularFilms(count);
+        List<Film> popularFilms = filmStorage.getMostPopularFilms(count);
+        Map<Long, Film> filmsMap = new HashMap<>();
+        for (Film film : popularFilms) {
+            filmsMap.put(film.getId(), film);
+        }
+        return new ArrayList<>(genreStorage.getGenresForFilm(filmsMap).values());
     }
 
     public void validateFilms(Film film) throws ValidateException {

@@ -23,4 +23,6 @@ public interface UserService {
     List<User> getAllFriends(long id);
 
     List<User> getUsersByIds(List<Long> ids);
+
+    void deleteUser(long id);
 }

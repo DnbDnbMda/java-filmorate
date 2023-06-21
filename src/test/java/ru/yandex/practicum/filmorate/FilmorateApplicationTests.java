@@ -361,6 +361,63 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    public void testDeleteUser() {
+        User user = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User friend = new User(2, "kotik@mail.ru", "kotik", "kate",
+                LocalDate.of(1998, 7, 11));
+
+        User addUser = userStorage.addUser(user);
+        User addFriend = userStorage.addUser(friend);
+
+        friendshipDbStorage.addToFriend(1, 2);
+
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма")
+                .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).build()).build();
+
+        filmDbStorage.addFilm(film1);
+        likesDbStorage.addLike(1, 1);
+
+        userStorage.deleteUser(addUser.getId());
+        userStorage.deleteUser(addFriend.getId());
+
+        List<Long> friendsDeleted = friendshipDbStorage.getAllFriendsByUser(1);
+        List<Long> likesFilm = likesDbStorage.getLikesByFilm(1);
+
+        assertEquals(0, friendsDeleted.size());
+        assertEquals(0, likesFilm.size());
+        assertEquals(0, userStorage.getAllUsers().size());
+    }
+
+    @Test
+    public void testDeleteFilm() {
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма")
+                .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).build()).build();
+
+        Film addFilm1 = filmDbStorage.addFilm(film1);
+
+        filmGenreStorage.addGenreToFilm(1, 2);
+        filmGenreStorage.addGenreToFilm(1, 4);
+
+        User user = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+
+        userStorage.addUser(user);
+        likesDbStorage.addLike(1, 1);
+
+        filmDbStorage.deleteFilm(addFilm1.getId());
+
+        List<Genre> genres = genreDbStorage.getGenreByFilm(1);
+        List<Long> likesFilm = likesDbStorage.getLikesByFilm(1);
+
+        assertEquals(0, genres.size());
+        assertEquals(0, likesFilm.size());
+        assertEquals(filmDbStorage.getAllFilms().size(), 0);
+    }
+
+    @Test
     public void testAddReview() {
         Film film = filmController.addFilm(Film.builder().name("Film name").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
         User user = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
