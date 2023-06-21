@@ -104,7 +104,6 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getFilmsByDirector(int directorId, String sortBy) {
-        directorStorage.getDirectorById(directorId);
         if (sortBy.equals("year")) {
             String sql = "SELECT f.*, mr.NAME FROM films as f " +
                     "JOIN MPA_RATING AS mr ON f.MPA_ID = mr.MPA_ID " +
