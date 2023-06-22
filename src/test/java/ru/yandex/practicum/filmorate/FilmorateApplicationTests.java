@@ -618,6 +618,73 @@ class FilmorateApplicationTests {
         assertEquals(2, filmsByLikes.size());
         assertEquals(film2.getName(), filmsByLikes.get(0).getName());
     }
+
+    @Test
+    public void testGetEmptyCommonFilms() {
+        User user1 = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser1 = userStorage.addUser(user1);
+
+        User user2 = new User(2, "email2@mail.ru", "login2", "name2",
+                LocalDate.of(1992, 7, 12));
+        User addUser2 = userStorage.addUser(user2);
+
+        List<Film> commonFilms = filmDbStorage.getCommonFilms(addUser1.getId(), addUser2.getId());
+        assertEquals(0, commonFilms.size());
+    }
+
+    @Test
+    public void testGetEmptyCommonFilms2() {
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма")
+                .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).build()).build();
+        filmDbStorage.addFilm(film1);
+
+        Film film2 = Film.builder().id(2).name("Хороший фильм2").description("Описание хорошего фильма2")
+                .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).build()).build();
+        filmDbStorage.addFilm(film2);
+
+        User user1 = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser1 = userStorage.addUser(user1);
+        User user2 = new User(2, "email2@mail.ru", "login2", "name2",
+                LocalDate.of(1992, 7, 12));
+        User addUser2 = userStorage.addUser(user2);
+        likesDbStorage.addLike(1, 1);
+        likesDbStorage.addLike(2, 2);
+
+        List<Film> commonFilms = filmDbStorage.getCommonFilms(addUser1.getId(), addUser2.getId());
+        assertEquals(0, commonFilms.size());
+    }
+
+    @Test
+    public void testGetCommonFilms() {
+
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма")
+                .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).build()).build();
+        filmDbStorage.addFilm(film1);
+
+        Film film2 = Film.builder().id(2).name("Хороший фильм2").description("Описание хорошего фильма2")
+                .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).build()).build();
+        filmDbStorage.addFilm(film2);
+
+        User user1 = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        User addUser1 = userStorage.addUser(user1);
+
+        User user2 = new User(2, "email2@mail.ru", "login2", "name2",
+                LocalDate.of(1992, 7, 12));
+        User addUser2 = userStorage.addUser(user2);
+
+        likesDbStorage.addLike(1, 1);
+        likesDbStorage.addLike(1, 2);
+
+        List<Film> commonFilms = filmDbStorage.getCommonFilms(addUser1.getId(), addUser2.getId());
+        assertEquals(1, commonFilms.size());
+    }
 }
 
 
