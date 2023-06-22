@@ -28,6 +28,7 @@ public class FilmServiceImpl implements FilmService {
     private final GenreStorage genreStorage;
     private final LikesDbStorage likesDbStorage;
     private final DirectorStorage directorStorage;
+    private final FeedStorage feedStorage;
     public static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
     public static final int LENGTH_DESCRIPTION = 200;
 
@@ -91,6 +92,7 @@ public class FilmServiceImpl implements FilmService {
         getFilmById(filmId);
         userStorage.getUserById(userId);
         likesDbStorage.addLike(filmId, userId);
+        feedStorage.addEntityToFeed(userId, "ADD", "LIKE", filmId);
     }
 
     @Override
@@ -101,6 +103,7 @@ public class FilmServiceImpl implements FilmService {
         }
         userStorage.getUserById(userId);
         likesDbStorage.deleteLike(filmId, userId);
+        feedStorage.addEntityToFeed(userId, "REMOVE", "LIKE", filmId);
         return getFilmById(filmId);
     }
 
