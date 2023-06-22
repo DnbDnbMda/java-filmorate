@@ -132,55 +132,16 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Collection<Film> getCommonFilms(long userId, long friendId) {
-
         String sqlQuery =
-                "SELECT" +
-                        "    *" +
-                        "FROM" +
-                        "    FILMS AS f" +
-                        "JOIN" +
-                        "    MPA AS m" +
-                        "        ON m.MPA_ID = f.MPA_ID" +
-                        "JOIN" +
-                        "    LIKES AS l1" +
-                        "        ON (" +
-                        "            l1.film_id = f.film_id" +
-                        "            AND l1.user_id = ?" +
-                        "        )" +
-                        "JOIN" +
-                        "    LIKES AS l2" +
-                        "        ON (" +
-                        "            l2.film_id = f.film_id" +
-                        "            AND l2.user_id = ?" +
-                        "        )" +
-                        "JOIN" +
-                        "    (" +
-                        "        SELECT" +
-                        "            film_id," +
-                        "            COUNT(user_id) AS rate" +
-                        "        FROM" +
-                        "            LIKES" +
-                        "        GROUP BY" +
-                        "            film_id" +
-                        "    ) AS fl" +
-                        "        ON (" +
-                        "            fl.film_id = f.film_id" +
-                        "        )" +
-                        "ORDER BY" +
-                        "    fl.rate DESC";
+                "SELECT * " +
+                        "FROM FILMS AS f " +
+                        "JOIN MPA_RATING AS m ON m.MPA_ID = f.MPA_ID " +
+                        "JOIN LIKES AS l1 ON (l1.film_id = f.film_id AND l1.user_id = ?) " +
+                        "JOIN LIKES AS l2 ON (l2.film_id = f.film_id AND l2.user_id = ?) " +
+                        "JOIN (SELECT film_id, COUNT(user_id) AS rate " +
+                        "FROM LIKES " +
+                        "GROUP BY film_id) AS fl ON (fl.film_id = f.film_id) " +
+                        "ORDER BY fl.rate DESC ";
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> mapRowToFilm(rs), userId, friendId);
     }
 }
-
-
-  /*  DROP TABLE IF EXISTS LIKES CASCADE;
-    create table IF NOT EXISTS LIKES
-        (
-                FILM_ID int NOT NULL,
-                USER_ID int NOT NULL,
-                constraint FK_LIKES_FILMID
-        foreign key (FILM_ID) references FILMS (FILM_ID)
-        on delete cascade,
-        constraint FK_LIKES_USERID
-        foreign key (USER_ID) references USERS (USER_ID) on delete cascade
-        );*/
