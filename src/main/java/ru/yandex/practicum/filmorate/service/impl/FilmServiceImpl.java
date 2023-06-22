@@ -12,10 +12,7 @@ import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.storage.dao.LikesDbStorage;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -158,5 +155,10 @@ public class FilmServiceImpl implements FilmService {
             log.error("ERROR: MPA не загрузился");
             throw new ValidateException("Необходимо добавить MPA");
         }
+    }
+
+    @Override
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
     }
 }
