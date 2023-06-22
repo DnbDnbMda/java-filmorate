@@ -669,7 +669,9 @@ class FilmorateApplicationTests {
 
         films = filmDbStorage.getFilmsByQuery("3444", "title,director");
         assertEquals(films.size(), 0);
+    }
 
+    @Test
     public void testGetEmptyCommonFilms() {
         User user1 = new User(1, "email@mail.ru", "login1", "name1",
                 LocalDate.of(1991, 7, 11));
