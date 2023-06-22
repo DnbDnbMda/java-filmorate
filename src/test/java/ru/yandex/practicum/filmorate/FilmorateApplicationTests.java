@@ -638,23 +638,23 @@ class FilmorateApplicationTests {
         System.out.println(addedFilm1);
         System.out.println(films);
         assertNotNull(films);
-        assertEquals(films.size(), 1);
-        assertEquals(films.get(0).getId(), addedFilm1.getId());
-        assertEquals(films.get(0).getName(), addedFilm1.getName());
+        assertEquals(1, films.size());
+        assertEquals(addedFilm1.getId(), films.get(0).getId());
+        assertEquals(addedFilm1.getName(), films.get(0).getName());
 
         films = filmDbStorage.getFilmsByQuery("F", "title,director");
         assertNotNull(films);
-        assertEquals(films.size(), 2);
-        assertEquals(films.get(0).getId(), addedFilm1.getId());
-        assertEquals(films.get(0).getName(), addedFilm1.getName());
-        assertEquals(films.get(1).getId(), addedFilm2.getId());
-        assertEquals(films.get(1).getName(), addedFilm2.getName());
+        assertEquals(2, films.size());
+        assertEquals(addedFilm1.getId(), films.get(0).getId());
+        assertEquals(addedFilm1.getName(), films.get(0).getName());
+        assertEquals(addedFilm2.getId(), films.get(1).getId());
+        assertEquals(addedFilm2.getName(), films.get(1).getName());
 
         films = filmDbStorage.getFilmsByQuery("tor", "director");
         assertNotNull(films);
-        assertEquals(films.size(), 1);
-        assertEquals(films.get(0).getId(), addedFilm2.getId());
-        assertEquals(films.get(0).getName(), addedFilm2.getName());
+        assertEquals(1, films.size());
+        assertEquals(addedFilm2.getId(), films.get(0).getId());
+        assertEquals(addedFilm2.getName(), films.get(0).getName());
 
         User user = User.builder().email("email@mail.ru").login("login1").name("name1")
                 .birthday(LocalDate.of(1991, 7, 11)).build();
@@ -663,12 +663,12 @@ class FilmorateApplicationTests {
 
         films = filmDbStorage.getFilmsByQuery("f", "title,director");
         assertNotNull(films);
-        assertEquals(films.size(), 2);
-        assertEquals(films.get(0).getId(), addedFilm2.getId());
-        assertEquals(films.get(1).getId(), addedFilm1.getId());
+        assertEquals(2, films.size());
+        assertEquals(addedFilm2.getId(), films.get(0).getId());
+        assertEquals(addedFilm1.getId(), films.get(1).getId());
 
         films = filmDbStorage.getFilmsByQuery("3444", "title,director");
-        assertEquals(films.size(), 0);
+        assertEquals(0, films.size());
     }
 
     @Test
