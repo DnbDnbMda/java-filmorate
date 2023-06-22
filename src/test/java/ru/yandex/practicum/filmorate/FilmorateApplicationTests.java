@@ -620,6 +620,58 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    public void getFilmsByQuery() {
+        Director director = Director.builder().name("Director f").build();
+        Director director1 = directorDbStorage.addDirector(director);
+        Film film1 = Film.builder().name("Film1").description("Desc1")
+                .releaseDate(LocalDate.of(2022, 1, 1)).duration(90)
+                .mpa(MpaRating.builder().id(4).build()).build();
+        Film film2 = Film.builder().name("T2").description("sc2")
+                .releaseDate(LocalDate.of(2000, 12, 8)).duration(150)
+                .mpa(MpaRating.builder().id(1).build()).build();
+        film2.getDirectors().add(director1);
+
+        Film addedFilm1 = filmService.addFilm(film1);
+        Film addedFilm2 = filmService.addFilm(film2);
+
+        List<Film> films = filmDbStorage.getFilmsByQuery("Film", "title");
+        System.out.println(addedFilm1);
+        System.out.println(films);
+        assertNotNull(films);
+        assertEquals(1, films.size());
+        assertEquals(addedFilm1.getId(), films.get(0).getId());
+        assertEquals(addedFilm1.getName(), films.get(0).getName());
+
+        films = filmDbStorage.getFilmsByQuery("F", "title,director");
+        assertNotNull(films);
+        assertEquals(2, films.size());
+        assertEquals(addedFilm1.getId(), films.get(0).getId());
+        assertEquals(addedFilm1.getName(), films.get(0).getName());
+        assertEquals(addedFilm2.getId(), films.get(1).getId());
+        assertEquals(addedFilm2.getName(), films.get(1).getName());
+
+        films = filmDbStorage.getFilmsByQuery("tor", "director");
+        assertNotNull(films);
+        assertEquals(1, films.size());
+        assertEquals(addedFilm2.getId(), films.get(0).getId());
+        assertEquals(addedFilm2.getName(), films.get(0).getName());
+
+        User user = User.builder().email("email@mail.ru").login("login1").name("name1")
+                .birthday(LocalDate.of(1991, 7, 11)).build();
+        User addedUser = userStorage.addUser(user);
+        likesDbStorage.addLike(addedFilm2.getId(), addedUser.getId());
+
+        films = filmDbStorage.getFilmsByQuery("f", "title,director");
+        assertNotNull(films);
+        assertEquals(2, films.size());
+        assertEquals(addedFilm2.getId(), films.get(0).getId());
+        assertEquals(addedFilm1.getId(), films.get(1).getId());
+
+        films = filmDbStorage.getFilmsByQuery("3444", "title,director");
+        assertEquals(0, films.size());
+    }
+
+    @Test
     public void testGetEmptyCommonFilms() {
         User user1 = new User(1, "email@mail.ru", "login1", "name1",
                 LocalDate.of(1991, 7, 11));
