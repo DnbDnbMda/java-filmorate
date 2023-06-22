@@ -126,6 +126,17 @@ public class FilmServiceImpl implements FilmService {
         return films;
     }
 
+    @Override
+    public List<Film> getFilmsByQuery(String query, String type) {
+        List<Film> films = filmStorage.getFilmsByQuery(query, type);
+        films.stream()
+                .forEach(film -> {
+                    film.getDirectors().addAll(directorStorage.getDirectorsForFilm(film.getId()));
+                    film.getGenres().addAll(genreStorage.getGenreByFilm(film.getId()));
+                });
+        return films;
+    }
+
     public void validateFilms(Film film) throws ValidateException {
         if (film.getName() == null || film.getName().isBlank()) {
             log.error("ERROR: поле Name не может быть пустым");

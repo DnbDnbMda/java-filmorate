@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -119,6 +120,38 @@ public class FilmDbStorage implements FilmStorage {
                 "SELECT fd.film_id FROM film_director AS fd where fd.director_id = ?) " +
                 "GROUP BY f.film_id ORDER BY rate DESC";
         return jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToFilm(rs), directorId);
+    }
+
+    @Override
+    public List<Film> getFilmsByQuery(String query, String type) {
+        StringBuilder sql = new StringBuilder("SELECT f.*, mr.NAME ")
+                .append("FROM FILMS AS f ")
+                .append("JOIN MPA_RATING AS mr ON f.MPA_ID = mr.MPA_ID ")
+                .append("LEFT JOIN (SELECT FILM_ID, COUNT(USER_ID) AS all_likes FROM LIKES GROUP BY FILM_ID) AS toplist ")
+                .append("ON f.FILM_ID = toplist.FILM_ID ")
+                .append("LEFT JOIN FILM_DIRECTOR AS fd ON f.FILM_ID = fd.FILM_ID ")
+                .append("LEFT JOIN DIRECTORS AS d ON fd.DIRECTOR_ID = d.ID ");
+
+        List<Object> params = new ArrayList<>();
+        StringBuilder where = new StringBuilder();
+
+        if (type.contains("title")) {
+            where.append("LOWER(f.NAME) LIKE CONCAT('%', LOWER(?), '%')");
+            params.add(query);
+        }
+        if (type.contains("director")) {
+            if (where.length() > 0) {
+                where.append(" OR ");
+            }
+            where.append("LOWER(d.NAME) LIKE CONCAT('%', LOWER(?), '%')");
+            params.add(query);
+        }
+        if (where.length() > 0) {
+            sql.append("WHERE ").append(where);
+        }
+
+        sql.append(" GROUP BY f.FILM_ID, mr.NAME ORDER BY COALESCE(toplist.all_likes, 0) DESC");
+        return jdbcTemplate.query(sql.toString(), (rs, rowNum) -> mapRowToFilm(rs), params.toArray());
     }
 
     @Override

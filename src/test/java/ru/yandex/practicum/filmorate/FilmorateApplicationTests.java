@@ -618,6 +618,58 @@ class FilmorateApplicationTests {
         assertEquals(2, filmsByLikes.size());
         assertEquals(film2.getName(), filmsByLikes.get(0).getName());
     }
+
+    @Test
+    public void getFilmsByQuery() {
+        Director director = Director.builder().name("Director f").build();
+        Director director1 = directorDbStorage.addDirector(director);
+        Film film1 = Film.builder().name("Film1").description("Desc1")
+                .releaseDate(LocalDate.of(2022, 1, 1)).duration(90)
+                .mpa(MpaRating.builder().id(4).build()).build();
+        Film film2 = Film.builder().name("T2").description("sc2")
+                .releaseDate(LocalDate.of(2000, 12, 8)).duration(150)
+                .mpa(MpaRating.builder().id(1).build()).build();
+        film2.getDirectors().add(director1);
+
+        Film addedFilm1 = filmService.addFilm(film1);
+        Film addedFilm2 = filmService.addFilm(film2);
+
+        List<Film> films = filmDbStorage.getFilmsByQuery("Film", "title");
+        System.out.println(addedFilm1);
+        System.out.println(films);
+        assertNotNull(films);
+        assertEquals(films.size(), 1);
+        assertEquals(films.get(0).getId(), addedFilm1.getId());
+        assertEquals(films.get(0).getName(), addedFilm1.getName());
+
+        films = filmDbStorage.getFilmsByQuery("F", "title,director");
+        assertNotNull(films);
+        assertEquals(films.size(), 2);
+        assertEquals(films.get(0).getId(), addedFilm1.getId());
+        assertEquals(films.get(0).getName(), addedFilm1.getName());
+        assertEquals(films.get(1).getId(), addedFilm2.getId());
+        assertEquals(films.get(1).getName(), addedFilm2.getName());
+
+        films = filmDbStorage.getFilmsByQuery("tor", "director");
+        assertNotNull(films);
+        assertEquals(films.size(), 1);
+        assertEquals(films.get(0).getId(), addedFilm2.getId());
+        assertEquals(films.get(0).getName(), addedFilm2.getName());
+
+        User user = User.builder().email("email@mail.ru").login("login1").name("name1")
+                .birthday(LocalDate.of(1991, 7, 11)).build();
+        User addedUser = userStorage.addUser(user);
+        likesDbStorage.addLike(addedFilm2.getId(), addedUser.getId());
+
+        films = filmDbStorage.getFilmsByQuery("f", "title,director");
+        assertNotNull(films);
+        assertEquals(films.size(), 2);
+        assertEquals(films.get(0).getId(), addedFilm2.getId());
+        assertEquals(films.get(1).getId(), addedFilm1.getId());
+
+        films = filmDbStorage.getFilmsByQuery("3444", "title,director");
+        assertEquals(films.size(), 0);
+    }
 }
 
 
