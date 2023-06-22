@@ -73,7 +73,8 @@ public class ReviewServiceImpl implements ReviewService {
     public Review updateReview(Review review) {
         reviewStorage.updateReview(review);
 
-        feedStorage.addEntityToFeed(review.getUserId(), "UPDATE", "REVIEW", review.getReviewId());
+        feedStorage.addEntityToFeed(findReview(review.getReviewId()).getUserId(),
+                "UPDATE", "REVIEW", review.getReviewId());
 
         return findReview(review.getReviewId());
     }
