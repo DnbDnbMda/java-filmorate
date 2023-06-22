@@ -148,4 +148,9 @@ public class FilmServiceImpl implements FilmService {
             throw new ValidateException("Необходимо добавить MPA");
         }
     }
+
+    @Override
+    public Collection<Film> getCommonFilms(long userId, long friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
 }
