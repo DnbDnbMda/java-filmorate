@@ -141,7 +141,6 @@ public class UserServiceImpl implements UserService {
         return feedStorage.getUserFeed(userId);
     }
 
-    public void validateUser(User user) {
     @Override
     public List<Film> getRecommendation(long userId) {
         return filmServiceImpl.getRecommendation(userId);
