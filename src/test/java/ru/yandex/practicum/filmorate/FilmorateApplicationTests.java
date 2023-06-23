@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.relational.core.sql.Like;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.MpaController;
@@ -452,12 +453,16 @@ class FilmorateApplicationTests {
 
         review1.setContent("Bad review");
         review1.setIsPositive(false);
+        review1.setUserId(333L);
+        review1.setFilmId(444L);
 
         Review review2 = reviewController.updateReview(review1);
 
         assertEquals(review1.getReviewId(), review2.getReviewId());
         assertEquals(review2.getContent(), review1.getContent());
         assertEquals(review2.getIsPositive(), review1.getIsPositive());
+        assertNotEquals(review2.getUserId(), review1.getUserId());
+        assertNotEquals(review2.getFilmId(), review1.getFilmId());
     }
 
     @Test
@@ -768,5 +773,33 @@ class FilmorateApplicationTests {
 
         List<Film> commonFilms = filmDbStorage.getCommonFilms(addUser1.getId(), addUser2.getId());
         assertEquals(1, commonFilms.size());
+    }
+
+    @Test
+    public void testGetRecommendation() {
+        Film film1 = filmController.addFilm(Film.builder().name("Good").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        Film film2 = filmController.addFilm(Film.builder().name("Bad").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        Film film3 = filmController.addFilm(Film.builder().name("Evil").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
+        User user1 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
+        User user2 = userController.addUser(User.builder().email("Gmail@").login("Login").name("Name").birthday(LocalDate.now()).build());
+
+        filmController.addLike(1, 1);
+        filmController.addLike(2, 1);
+        filmController.addLike(3, 1);
+
+
+        List<Film> films = userController.getRecommendation(2);
+        assertTrue(films.isEmpty());
+
+        filmController.addLike(1, 2);
+
+        films = userController.getRecommendation(2);
+        assertEquals(2, films.size());
+
+        filmController.addLike(2, 2);
+        films = userController.getRecommendation(2);
+
+        assertEquals(1, films.size());
+        assertEquals("Evil", films.get(0).getName());
     }
 }
