@@ -5,11 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.dao.FriendshipDbStorage;
 
@@ -28,12 +30,15 @@ public class UserServiceImpl implements UserService {
     private final FilmStorage filmDbStorage;
     private final DirectorStorage directorDbStorage;
     private final GenreStorage genreDbStorage;
+    private final FeedStorage feedStorage;
 
     @Autowired
     public UserServiceImpl(UserStorage userStorage, FriendshipDbStorage friendshipDbStorage, FilmStorage filmDbStorage,
                            DirectorStorage directorDbStorage, GenreStorage genreDbStorage) {
+    public UserServiceImpl(UserStorage userStorage, FriendshipDbStorage friendshipDbStorage, FeedStorage feedStorage) {
         this.userStorage = userStorage;
         this.friendshipDbStorage = friendshipDbStorage;
+        this.feedStorage = feedStorage;
         this.filmDbStorage = filmDbStorage;
         this.directorDbStorage = directorDbStorage;
         this.genreDbStorage = genreDbStorage;
@@ -82,6 +87,7 @@ public class UserServiceImpl implements UserService {
         if (!isUserHasFriend && !isFriendHasUserFriend) {
             friendshipDbStorage.addToFriend(userId, friendId);
             usersFriends.add(friendId);
+            feedStorage.addEntityToFeed(friendId, "ADD", "FRIEND", userId);
             log.info("Пользователь с id {} добавлен в друзья к {}", userId, friendId);
         } else if (!isUserHasFriend) {
             friendshipDbStorage.addToFriend(userId, friendId);
@@ -89,6 +95,7 @@ public class UserServiceImpl implements UserService {
             friendshipDbStorage.updateFriendStatus(friendId, userId, true);
             log.info("Пользователь id = {} подтвердил дружбу с пользователем id = {}", userId, friendId);
             usersFriends.add(friendId);
+            feedStorage.addEntityToFeed(friendId, "ADD", "FRIEND", userId);
         } else {
             log.info("Пользователь id = {} уже в друзьях у пользователя id = {}", friendId, userId);
             throw new ValidationException(format("Пользователь id = %s уже в друзьях у пользователя id = %s",
@@ -102,6 +109,7 @@ public class UserServiceImpl implements UserService {
         Set<Long> friendsFriends = getUserById(friendId).getFriends();
         if (!friendsFriends.contains(userId)) {
             friendshipDbStorage.deleteFromFriend(userId, friendId);
+            feedStorage.addEntityToFeed(friendId, "REMOVE", "FRIEND", userId);
             log.info("Пользователь id = {} удалил из друзей пользователя id = {}", userId, friendId);
         } else if (!usersFriends.contains(friendId)) {
             log.error("Пользователь id = {} не в друзьях у пользователя id = {}", friendId, userId);
@@ -109,6 +117,7 @@ public class UserServiceImpl implements UserService {
                     friendId, userId));
         } else {
             friendshipDbStorage.deleteFromFriend(userId, friendId);
+            feedStorage.addEntityToFeed(friendId, "REMOVE", "FRIEND", userId);
             friendshipDbStorage.updateFriendStatus(friendId, userId, false);
             log.info("Пользователь id = {} удалил из друзей пользователя id = {}, статус дружбы обновлен",
                     userId, friendId);
@@ -143,6 +152,14 @@ public class UserServiceImpl implements UserService {
     }
 
     private void validateUser(User user) {
+    @Override
+    public Collection<Event> getUserFeed(long userId) {
+        getUserById(userId);
+
+        return feedStorage.getUserFeed(userId);
+    }
+
+    public void validateUser(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("ERROR: электронная почта пустая");
             throw new ValidateException("Электронная почта не может быть пустой");

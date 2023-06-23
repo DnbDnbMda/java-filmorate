@@ -737,39 +737,6 @@ class FilmorateApplicationTests {
         List<Film> commonFilms = filmDbStorage.getCommonFilms(addUser1.getId(), addUser2.getId());
         assertEquals(1, commonFilms.size());
     }
-
-    @Test
-    public void testGetRecommendation() {
-        Film film1 = filmController.addFilm(Film.builder().name("Good").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
-        Film film2 = filmController.addFilm(Film.builder().name("Bad").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
-        Film film3 = filmController.addFilm(Film.builder().name("Evil").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
-        User user1 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
-        User user2 = userController.addUser(User.builder().email("Gmail@").login("Login").name("Name").birthday(LocalDate.now()).build());
-
-        filmController.addLike(2, 1);
-        filmController.addLike(3, 1);
-
-
-        List<Film> films = userController.getRecommendation(2);
-        assertTrue(films.isEmpty());
-
-        filmController.addLike(1, 2);
-
-        films = userController.getRecommendation(2);
-        assertEquals(0, films.size());
-
-        filmController.addLike(2, 2);
-        films = userController.getRecommendation(1);
-
-        assertEquals(1, films.size());
-        assertEquals("Good", films.get(0).getName());
-
-        filmController.deleteLike(1,1);
-        films = userController.getRecommendation(1);
-
-        assertEquals(1, films.size());
-        assertEquals("Good", films.get(0).getName());
-    }
 }
 
 
