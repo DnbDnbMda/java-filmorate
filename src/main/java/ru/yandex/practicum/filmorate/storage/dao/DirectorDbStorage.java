@@ -101,13 +101,13 @@ public class DirectorDbStorage implements DirectorStorage {
 
     @Override
     public List<Film> setDirectorsForFilms(List<Film> films) {
-        Map<Long, Film> filmMap = new HashMap<>();
+        Map<Long, Film> filmMap = new LinkedHashMap<>();
         films.forEach(film -> filmMap.put(film.getId(), film));
         Set<Long> filmIdSet = filmMap.keySet();
 
         SqlParameterSource sqlParameterSource = new MapSqlParameterSource("filmIdSet", filmIdSet);
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        String sql = "SELECT d.id, d.name FROM directors AS d " +
+        String sql = "SELECT d.id, d.name, fd.film_id FROM directors AS d " +
                 "JOIN film_director AS fd ON d.id = fd.director_id WHERE fd.film_id IN (:filmIdSet)";
         namedParameterJdbcTemplate.query(sql, sqlParameterSource, (rs, rowNum) -> {
             Film film = filmMap.get(rs.getLong("film_id"));
