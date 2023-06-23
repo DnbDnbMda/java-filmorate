@@ -12,7 +12,10 @@ import ru.yandex.practicum.filmorate.storage.*;
 import ru.yandex.practicum.filmorate.storage.dao.LikesDbStorage;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -105,8 +108,8 @@ public class FilmServiceImpl implements FilmService {
     }
 
     @Override
-    public List<Film> getMostPopularFilms(int count) {
-        List<Film> popularFilms = filmStorage.getMostPopularFilms(count);
+    public List<Film> getMostPopularFilms(int count, Integer genreId, Integer year) {
+        List<Film> popularFilms = filmStorage.getMostPopularFilms(count, genreId, year);
         Map<Long, Film> filmsMap = new HashMap<>();
         for (Film film : popularFilms) {
             filmsMap.put(film.getId(), film);
