@@ -157,7 +157,13 @@ public class UserServiceImpl implements UserService {
         return new ArrayList<>(genreDbStorage.getGenresForFilm(filmsMap).values());
     }
 
-    private void validateUser(User user) {
+    @Override
+    public Collection<Event> getUserFeed(long userId) {
+        getUserById(userId);
+        return feedStorage.getUserFeed(userId);
+    }
+
+    public void validateUser(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("ERROR: электронная почта пустая");
             throw new ValidateException("Электронная почта не может быть пустой");
