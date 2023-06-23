@@ -74,9 +74,4 @@ public class UserController {
     public Collection<Event> getUserFeed(@PathVariable long id) {
         return userService.getUserFeed(id);
     }
-
-    @GetMapping("{id}/recommendations") //возвращаем список фильмов-рекомендаций для пользователя
-    public List<Film> getRecommendation(@PathVariable long id) {
-        return userService.getRecommendation(id);
-    }
 }

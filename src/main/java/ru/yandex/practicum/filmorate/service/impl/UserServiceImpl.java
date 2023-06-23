@@ -142,12 +142,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<Film> getRecommendation(long userId) {
         List<Film> films = filmDbStorage.getRecommendation(userId);
-        films = directorDbStorage.setDirectorsForFilms(films);
-        Map<Long, Film> filmsMap = new HashMap<>();
-        for (Film film : films) {
-            filmsMap.put(film.getId(), film);
+        if (films.isEmpty()) {
+            return films;
         }
-        return new ArrayList<>(genreDbStorage.getGenresForFilm(filmsMap).values());
+        List<Film> filmsWithDir = directorDbStorage.setDirectorsForFilms(films);
+        return genreDbStorage.getGenresForFilm(filmsWithDir);
     }
 
     @Override
