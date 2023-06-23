@@ -7,17 +7,17 @@ import ru.yandex.practicum.filmorate.exception.ValidateException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
 import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.dao.FriendshipDbStorage;
 
 import javax.validation.ValidationException;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -27,15 +27,20 @@ import static java.lang.String.format;
 public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
     private final FriendshipDbStorage friendshipDbStorage;
-    private final FilmService filmServiceImpl;
+    private final FilmStorage filmDbStorage;
+    private final DirectorStorage directorDbStorage;
+    private final GenreStorage genreDbStorage;
     private final FeedStorage feedStorage;
 
     @Autowired
-    public UserServiceImpl(UserStorage userStorage, FriendshipDbStorage friendshipDbStorage, FilmService filmServiceImpl, FeedStorage feedStorage) {
+    public UserServiceImpl(UserStorage userStorage, FriendshipDbStorage friendshipDbStorage, FilmStorage filmDbStorage,
+                           DirectorStorage directorDbStorage, GenreStorage genreDbStorage, FeedStorage feedStorage) {
         this.userStorage = userStorage;
         this.friendshipDbStorage = friendshipDbStorage;
+        this.filmDbStorage = filmDbStorage;
+        this.directorDbStorage = directorDbStorage;
+        this.genreDbStorage = genreDbStorage;
         this.feedStorage = feedStorage;
-        this.filmServiceImpl = filmServiceImpl;
     }
 
     @Override
@@ -143,7 +148,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<Film> getRecommendation(long userId) {
-        return filmServiceImpl.getRecommendation(userId);
+        List<Film> films = filmDbStorage.getRecommendation(userId);
+        films = directorDbStorage.setDirectorsForFilms(films);
+        Map<Long, Film> filmsMap = new HashMap<>();
+        for (Film film : films) {
+            filmsMap.put(film.getId(), film);
+        }
+        return new ArrayList<>(genreDbStorage.getGenresForFilm(filmsMap).values());
     }
 
     private void validateUser(User user) {
