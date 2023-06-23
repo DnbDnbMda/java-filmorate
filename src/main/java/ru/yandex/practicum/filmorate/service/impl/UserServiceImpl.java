@@ -4,7 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.dao.FriendshipDbStorage;
@@ -23,11 +25,13 @@ import static java.lang.String.format;
 public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
     private final FriendshipDbStorage friendshipDbStorage;
+    private final FilmService filmServiceImpl;
 
     @Autowired
-    public UserServiceImpl(UserStorage userStorage, FriendshipDbStorage friendshipDbStorage) {
+    public UserServiceImpl(UserStorage userStorage, FriendshipDbStorage friendshipDbStorage, FilmService filmServiceImpl) {
         this.userStorage = userStorage;
         this.friendshipDbStorage = friendshipDbStorage;
+        this.filmServiceImpl = filmServiceImpl;
     }
 
     @Override
@@ -122,7 +126,12 @@ public class UserServiceImpl implements UserService {
         return userStorage.getAllById(commonFriendsIds);
     }
 
-    public void validateUser(User user) {
+    @Override
+    public List<Film> getRecommendation(long userId) {
+        return filmServiceImpl.getRecommendation(userId);
+    }
+
+    private void validateUser(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("ERROR: электронная почта пустая");
             throw new ValidateException("Электронная почта не может быть пустой");

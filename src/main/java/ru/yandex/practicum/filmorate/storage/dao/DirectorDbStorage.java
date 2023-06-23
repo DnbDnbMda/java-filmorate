@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
@@ -15,7 +17,7 @@ import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -95,6 +97,23 @@ public class DirectorDbStorage implements DirectorStorage {
     public void deleteDirectorsFromFilm(Film film) {
         String sqlDelete = "delete from film_director where film_id = ?;";
         jdbcTemplate.update(sqlDelete, film.getId());
+    }
+
+    @Override
+    public List<Film> setDirectorsForFilms(List<Film> films) {
+        Map<Long, Film> filmMap = new HashMap<>();
+        films.forEach(film -> filmMap.put(film.getId(), film));
+        Set<Long> filmIdSet = filmMap.keySet();
+
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource("filmIdSet", filmIdSet);
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        String sql = "SELECT d.id, d.name FROM directors AS d " +
+                "JOIN film_director AS fd ON d.id = fd.director_id WHERE fd.film_id IN (:filmIdSet)";
+        namedParameterJdbcTemplate.query(sql, sqlParameterSource, (rs, rowNum) -> {
+            Film film = filmMap.get(rs.getLong("film_id"));
+            return film.getDirectors().add(makeDirector(rs));
+        });
+        return new ArrayList<>(filmMap.values());
     }
 
     private Director makeDirector(ResultSet rs) throws SQLException {

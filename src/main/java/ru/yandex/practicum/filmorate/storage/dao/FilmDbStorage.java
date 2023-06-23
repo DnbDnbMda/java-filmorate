@@ -11,15 +11,13 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.MpaRating;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -31,13 +29,17 @@ public class FilmDbStorage implements FilmStorage {
     private final GenreStorage genreStorage;
     private final FilmGenreDbStorage filmGenreDbStorage;
     private final MpaDbStorage mpaDbStorage;
+    private final DirectorStorage directorDbStorage;
 
-    public FilmDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate, GenreStorage genreStorage, FilmGenreDbStorage filmGenreDbStorage, MpaDbStorage mpaDbStorage) {
+    public FilmDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate,
+                         GenreStorage genreStorage, FilmGenreDbStorage filmGenreDbStorage, MpaDbStorage mpaDbStorage,
+                         DirectorStorage directorDbStorage) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.jdbcTemplate = jdbcTemplate;
         this.genreStorage = genreStorage;
         this.filmGenreDbStorage = filmGenreDbStorage;
         this.mpaDbStorage = mpaDbStorage;
+        this.directorDbStorage = directorDbStorage;
     }
 
     @Override
@@ -161,17 +163,6 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlDelFilm, id);
     }
 
-    private Film mapRowToFilm(ResultSet rs) throws SQLException {
-        return Film.builder()
-                .id(rs.getLong("film_id"))
-                .name(rs.getString("name"))
-                .description(rs.getString("description"))
-                .releaseDate(rs.getDate("release_date").toLocalDate())
-                .duration(rs.getInt("duration"))
-                .mpa(new MpaRating(rs.getInt("mpa_id"), rs.getString("MPA_RATING.NAME"), null))
-                .build();
-    }
-
     @Override
     public List<Film> getCommonFilms(long userId, long friendId) {
         String sqlQuery =
@@ -185,5 +176,51 @@ public class FilmDbStorage implements FilmStorage {
                         "GROUP BY film_id) AS fl ON (fl.film_id = f.film_id) " +
                         "ORDER BY fl.rate DESC ";
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> mapRowToFilm(rs), userId, friendId);
+    }
+
+    @Override
+    public List<Film> getRecommendation(long userId) {
+        String sqlFilmsId = "SELECT l.film_id " +
+                "FROM likes AS l " +
+                "WHERE l.user_id IN (SELECT user_id " +
+                "FROM likes AS l1 " +
+                "WHERE l1.film_id IN (SELECT l2.film_id " +
+                "FROM likes AS l2 " +
+                "WHERE l2.user_id = ?) " +
+                "AND l1.user_id <> ? " +
+                "AND EXISTS (SELECT l3.film_id " +
+                "FROM likes AS l3 WHERE l3.film_id NOT IN (SELECT l4.film_id  " +
+                "FROM likes AS l4 " +
+                "WHERE l4.user_id = ?)) " +
+                "GROUP BY l1.user_id " +
+                "ORDER BY COUNT(l.film_id) " +
+                "LIMIT 1) " +
+                "GROUP BY l.film_id " +
+                "HAVING l.film_id NOT IN (SELECT l5.film_id " +
+                "FROM likes AS l5 " +
+                "WHERE l5.user_id = ?) " +
+                "ORDER BY l.film_id";
+
+        Set<Long> filmsId = new HashSet<>(jdbcTemplate.query(sqlFilmsId, (rs, rowNum) -> rs.getLong("film_id"),
+                userId, userId, userId, userId));
+
+        SqlParameterSource sqlParameterSource = new MapSqlParameterSource("filmsId", filmsId);
+        NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
+        String sqlFilms = "SELECT * FROM films AS f " +
+                "LEFT JOIN  mpa_rating AS r ON f.mpa_id = r.mpa_id " +
+                "WHERE f.film_id IN (:filmsId)";
+
+        return namedParameterJdbcTemplate.query(sqlFilms, sqlParameterSource, (rs, rowNum) -> mapRowToFilm(rs));
+    }
+
+    private Film mapRowToFilm(ResultSet rs) throws SQLException {
+        return Film.builder()
+                .id(rs.getLong("film_id"))
+                .name(rs.getString("name"))
+                .description(rs.getString("description"))
+                .releaseDate(rs.getDate("release_date").toLocalDate())
+                .duration(rs.getInt("duration"))
+                .mpa(new MpaRating(rs.getInt("mpa_id"), rs.getString("MPA_RATING.NAME"), null))
+                .build();
     }
 }
