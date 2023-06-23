@@ -161,15 +161,4 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> getCommonFilms(long userId, long friendId) {
         return filmStorage.getCommonFilms(userId, friendId);
     }
-
-    @Override
-    public List<Film> getRecommendation(long userId) {
-        List<Film> films = filmStorage.getRecommendation(userId);
-        films = directorStorage.setDirectorsForFilms(films);
-        Map<Long, Film> filmsMap = new HashMap<>();
-        for (Film film : films) {
-            filmsMap.put(film.getId(), film);
-        }
-        return new ArrayList<>(genreStorage.getGenresForFilm(filmsMap).values());
-    }
 }
