@@ -317,7 +317,7 @@ class FilmorateApplicationTests {
         likesDbStorage.addLike(1, 2);
         likesDbStorage.addLike(1, 1);
 
-        List<Film> popularFilms = filmDbStorage.getMostPopularFilms(1);
+        List<Film> popularFilms = filmDbStorage.getMostPopularFilms(1, null,null);
         assertEquals(1, popularFilms.size());
     }
 
