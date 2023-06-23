@@ -746,7 +746,6 @@ class FilmorateApplicationTests {
         User user1 = userController.addUser(User.builder().email("Email@").login("Login").name("Name").birthday(LocalDate.now()).build());
         User user2 = userController.addUser(User.builder().email("Gmail@").login("Login").name("Name").birthday(LocalDate.now()).build());
 
-        filmController.addLike(1, 1);
         filmController.addLike(2, 1);
         filmController.addLike(3, 1);
 
@@ -757,13 +756,19 @@ class FilmorateApplicationTests {
         filmController.addLike(1, 2);
 
         films = userController.getRecommendation(2);
-        assertEquals(2, films.size());
+        assertEquals(0, films.size());
 
         filmController.addLike(2, 2);
-        films = userController.getRecommendation(2);
+        films = userController.getRecommendation(1);
 
         assertEquals(1, films.size());
-        assertEquals("Evil", films.get(0).getName());
+        assertEquals("Good", films.get(0).getName());
+
+        filmController.deleteLike(1,1);
+        films = userController.getRecommendation(1);
+
+        assertEquals(1, films.size());
+        assertEquals("Good", films.get(0).getName());
     }
 }
 
