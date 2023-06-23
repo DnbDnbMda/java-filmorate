@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 
 import java.util.Collection;
@@ -17,14 +18,16 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewStorage reviewStorage;
     private final UserService userService;
     private final FilmService filmService;
+    private final FeedStorage feedStorage;
 
     @Autowired
     public ReviewServiceImpl(ReviewStorage reviewStorage,
                              UserService userService,
-                             FilmService filmService) {
+                             FilmService filmService, FeedStorage feedStorage) {
         this.reviewStorage = reviewStorage;
         this.userService = userService;
         this.filmService = filmService;
+        this.feedStorage = feedStorage;
     }
 
     public Collection<Review> getAllReviews() {
@@ -61,12 +64,17 @@ public class ReviewServiceImpl implements ReviewService {
 
         long reviewId = reviewStorage.addReview(review);
 
+        feedStorage.addEntityToFeed(review.getUserId(), "ADD", "REVIEW", reviewId);
+
         return findReview(reviewId);
     }
 
     @Override
     public Review updateReview(Review review) {
         reviewStorage.updateReview(review);
+
+        feedStorage.addEntityToFeed(findReview(review.getReviewId()).getUserId(),
+                "UPDATE", "REVIEW", review.getReviewId());
 
         return findReview(review.getReviewId());
     }
@@ -83,7 +91,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public void deleteReview(long id) {
+        long userId = findReview(id).getUserId();
+
         reviewStorage.deleteReview(id);
+        feedStorage.addEntityToFeed(userId, "REMOVE", "REVIEW", id);
     }
 
     @Override

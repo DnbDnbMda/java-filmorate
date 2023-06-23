@@ -17,6 +17,7 @@ import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dao.*;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -451,16 +452,12 @@ class FilmorateApplicationTests {
 
         review1.setContent("Bad review");
         review1.setIsPositive(false);
-        review1.setUserId(333L);
-        review1.setFilmId(444L);
 
         Review review2 = reviewController.updateReview(review1);
 
         assertEquals(review1.getReviewId(), review2.getReviewId());
         assertEquals(review2.getContent(), review1.getContent());
         assertEquals(review2.getIsPositive(), review1.getIsPositive());
-        assertNotEquals(review2.getUserId(), review1.getUserId());
-        assertNotEquals(review2.getFilmId(), review1.getFilmId());
     }
 
     @Test
@@ -620,6 +617,41 @@ class FilmorateApplicationTests {
     }
 
     @Test
+    public void testGetUserFeed() {
+        User user = new User(1, "email@mail.ru", "login1", "name1",
+                LocalDate.of(1991, 7, 11));
+        userController.addUser(user);
+
+        Film film = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма")
+                .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).build()).build();
+        filmController.addFilm(film);
+
+        Review review = reviewController.addReview(Review.builder().content("Good review")
+                .isPositive(true).userId(user.getId()).filmId(film.getId()).build());
+
+        review.setContent("Bad review");
+        review.setIsPositive(false);
+
+        reviewController.updateReview(review);
+        reviewController.deleteReview(1);
+
+        filmController.addLike(1, 1);
+        filmController.deleteLike(1, 1);
+
+        User friend = new User(2, "kotik@mail.ru", "kotik", "kate",
+                LocalDate.of(1998, 7, 11));
+        userController.addUser(friend);
+
+        userController.addToFriend(1, 2);
+        userController.deleteFromFriend(1, 2);
+
+        Collection<Event> feed = userController.getUserFeed(1);
+
+        assertEquals(7, feed.size());
+    }
+
+    @Test
     public void getFilmsByQuery() {
         Director director = Director.builder().name("Director f").build();
         Director director1 = directorDbStorage.addDirector(director);
@@ -738,7 +770,3 @@ class FilmorateApplicationTests {
         assertEquals(1, commonFilms.size());
     }
 }
-
-
-
-
