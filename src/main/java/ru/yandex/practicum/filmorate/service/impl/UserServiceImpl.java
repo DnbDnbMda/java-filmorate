@@ -34,8 +34,7 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     public UserServiceImpl(UserStorage userStorage, FriendshipDbStorage friendshipDbStorage, FilmStorage filmDbStorage,
-                           DirectorStorage directorDbStorage, GenreStorage genreDbStorage) {
-    public UserServiceImpl(UserStorage userStorage, FriendshipDbStorage friendshipDbStorage, FeedStorage feedStorage) {
+                           DirectorStorage directorDbStorage, GenreStorage genreDbStorage, FeedStorage feedStorage) {
         this.userStorage = userStorage;
         this.friendshipDbStorage = friendshipDbStorage;
         this.feedStorage = feedStorage;
@@ -151,11 +150,9 @@ public class UserServiceImpl implements UserService {
         return new ArrayList<>(genreDbStorage.getGenresForFilm(filmsMap).values());
     }
 
-    private void validateUser(User user) {
     @Override
     public Collection<Event> getUserFeed(long userId) {
         getUserById(userId);
-
         return feedStorage.getUserFeed(userId);
     }
 
