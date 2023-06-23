@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.relational.core.sql.Like;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.controller.MpaController;
@@ -773,7 +774,6 @@ class FilmorateApplicationTests {
         List<Film> commonFilms = filmDbStorage.getCommonFilms(addUser1.getId(), addUser2.getId());
         assertEquals(1, commonFilms.size());
     }
-
     @Test
     public void testGetRecommendation() {
         Film film1 = filmController.addFilm(Film.builder().name("Good").description("Film description").releaseDate(LocalDate.now()).duration(50).mpa(mpaController.getMpaById(1)).build());
