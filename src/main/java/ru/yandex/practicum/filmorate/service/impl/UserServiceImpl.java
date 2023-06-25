@@ -156,12 +156,6 @@ public class UserServiceImpl implements UserService {
         return genreDbStorage.getGenresForFilm(filmsWithDir);
     }
 
-    @Override
-    public Collection<Event> getUserFeed(long userId) {
-        getUserById(userId);
-        return feedStorage.getUserFeed(userId);
-    }
-
     public void validateUser(User user) {
         if (user.getEmail() == null || user.getEmail().isBlank()) {
             log.error("ERROR: электронная почта пустая");

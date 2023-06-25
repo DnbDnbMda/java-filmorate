@@ -159,14 +159,4 @@ public class FilmServiceImpl implements FilmService {
     public List<Film> getCommonFilms(long userId, long friendId) {
         return filmStorage.getCommonFilms(userId, friendId);
     }
-
-    @Override
-    public List<Film> getRecommendation(long userId) {
-        List<Film> films = filmStorage.getRecommendation(userId);
-        if (films.isEmpty()) {
-            return films;
-        }
-        List<Film> filmsWithDir = directorStorage.setDirectorsForFilms(films);
-        return genreStorage.getGenresForFilm(filmsWithDir);
-    }
 }
