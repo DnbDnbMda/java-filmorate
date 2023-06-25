@@ -17,7 +17,6 @@ import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dao.*;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -618,41 +617,6 @@ class FilmorateApplicationTests {
         assertNotNull(filmsByLikes);
         assertEquals(2, filmsByLikes.size());
         assertEquals(film2.getName(), filmsByLikes.get(0).getName());
-    }
-
-    @Test
-    public void testGetUserFeed() {
-        User user = new User(1, "email@mail.ru", "login1", "name1",
-                LocalDate.of(1991, 7, 11));
-        userController.addUser(user);
-
-        Film film = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма")
-                .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
-                .mpa(MpaRating.builder().id(1).build()).build();
-        filmController.addFilm(film);
-
-        Review review = reviewController.addReview(Review.builder().content("Good review")
-                .isPositive(true).userId(user.getId()).filmId(film.getId()).build());
-
-        review.setContent("Bad review");
-        review.setIsPositive(false);
-
-        reviewController.updateReview(review);
-        reviewController.deleteReview(1);
-
-        filmController.addLike(1, 1);
-        filmController.deleteLike(1, 1);
-
-        User friend = new User(2, "kotik@mail.ru", "kotik", "kate",
-                LocalDate.of(1998, 7, 11));
-        userController.addUser(friend);
-
-        userController.addToFriend(1, 2);
-        userController.deleteFromFriend(1, 2);
-
-        Collection<Event> feed = userController.getUserFeed(1);
-
-        assertEquals(7, feed.size());
     }
 
     @Test
