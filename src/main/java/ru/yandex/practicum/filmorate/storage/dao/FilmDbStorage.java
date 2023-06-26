@@ -11,9 +11,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.MpaRating;
-import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.GenreStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,20 +24,10 @@ public class FilmDbStorage implements FilmStorage {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final JdbcTemplate jdbcTemplate;
-    private final GenreStorage genreStorage;
-    private final FilmGenreDbStorage filmGenreDbStorage;
-    private final MpaDbStorage mpaDbStorage;
-    private final DirectorStorage directorDbStorage;
 
-    public FilmDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate,
-                         GenreStorage genreStorage, FilmGenreDbStorage filmGenreDbStorage, MpaDbStorage mpaDbStorage,
-                         DirectorStorage directorDbStorage) {
+    public FilmDbStorage(NamedParameterJdbcTemplate namedParameterJdbcTemplate, JdbcTemplate jdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.jdbcTemplate = jdbcTemplate;
-        this.genreStorage = genreStorage;
-        this.filmGenreDbStorage = filmGenreDbStorage;
-        this.mpaDbStorage = mpaDbStorage;
-        this.directorDbStorage = directorDbStorage;
     }
 
     @Override
