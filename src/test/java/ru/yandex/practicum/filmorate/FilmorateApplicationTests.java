@@ -805,7 +805,7 @@ class FilmorateApplicationTests {
 
 
     @Test
-    void getMostPopularFilmsTest() {
+    void testGetMostPopularFilmsByGenreAndYear() {
         Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма")
                 .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
                 .mpa(MpaRating.builder().id(1).name("G").build()).build();
