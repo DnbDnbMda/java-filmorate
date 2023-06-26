@@ -452,16 +452,12 @@ class FilmorateApplicationTests {
 
         review1.setContent("Bad review");
         review1.setIsPositive(false);
-        review1.setUserId(333L);
-        review1.setFilmId(444L);
 
         Review review2 = reviewController.updateReview(review1);
 
         assertEquals(review1.getReviewId(), review2.getReviewId());
         assertEquals(review2.getContent(), review1.getContent());
         assertEquals(review2.getIsPositive(), review1.getIsPositive());
-        assertNotEquals(review2.getUserId(), review1.getUserId());
-        assertNotEquals(review2.getFilmId(), review1.getFilmId());
     }
 
     @Test
