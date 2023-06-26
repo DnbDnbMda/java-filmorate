@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -12,15 +13,15 @@ import ru.yandex.practicum.filmorate.controller.ReviewController;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.GenreService;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl;
 import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dao.*;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -768,5 +769,41 @@ class FilmorateApplicationTests {
 
         List<Film> commonFilms = filmDbStorage.getCommonFilms(addUser1.getId(), addUser2.getId());
         assertEquals(1, commonFilms.size());
+    }
+
+
+
+    @Test
+    void getMostPopularFilmsTest() {
+        Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма")
+                .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).name("G").build()).build();
+        filmDbStorage.addFilm(film1);
+        filmGenreStorage.addGenreToFilm(1, 1);
+
+        Film film2 = Film.builder().id(2).name("Отличный фильм").description("Описание отличного фильма")
+                .releaseDate(LocalDate.of(2000, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).name("G").build()).build();
+        filmDbStorage.addFilm(film2);
+        filmGenreStorage.addGenreToFilm(2, 2);
+
+        Film film3 = Film.builder().id(3).name("Хороший фильм2").description("Описание хорошего фильма2")
+                .releaseDate(LocalDate.of(2020, 12, 12)).duration(120)
+                .mpa(MpaRating.builder().id(1).name("G").build()).build();
+        filmDbStorage.addFilm(film3);
+        filmGenreStorage.addGenreToFilm(3, 1);
+
+        List<Film> findByGenreAndYear = filmDbStorage.getMostPopularFilms(10,1,2000);
+        List<Film> findByGenre = filmDbStorage.getMostPopularFilms(10,1,null);
+        List<Film> findByYear = filmDbStorage.getMostPopularFilms(10,null,2000);
+
+        assertEquals(1, findByGenreAndYear.size());
+        assertEquals(1, findByGenreAndYear.get(0).getId());
+        assertEquals(2, findByGenre.size());
+        assertNotNull(findByGenre.stream().filter(film -> film.getId() == 1).findFirst().orElse(null));
+        assertNotNull(findByGenre.stream().filter(film -> film.getId() == 3).findFirst().orElse(null));
+        assertEquals(2, findByYear.size());
+        assertNotNull(findByYear.stream().filter(film -> film.getId() == 1).findFirst().orElse(null));
+        assertNotNull(findByYear.stream().filter(film -> film.getId() == 2).findFirst().orElse(null));
     }
 }
