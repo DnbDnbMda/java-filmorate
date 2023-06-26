@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate;
 
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -13,15 +12,15 @@ import ru.yandex.practicum.filmorate.controller.ReviewController;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
-import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.service.GenreService;
-import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.service.impl.FilmServiceImpl;
 import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
 import ru.yandex.practicum.filmorate.storage.dao.*;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -318,7 +317,7 @@ class FilmorateApplicationTests {
         likesDbStorage.addLike(1, 2);
         likesDbStorage.addLike(1, 1);
 
-        List<Film> popularFilms = filmDbStorage.getMostPopularFilms(1, null,null);
+        List<Film> popularFilms = filmDbStorage.getMostPopularFilms(1, null, null);
         assertEquals(1, popularFilms.size());
     }
 
@@ -772,7 +771,6 @@ class FilmorateApplicationTests {
     }
 
 
-
     @Test
     void getMostPopularFilmsTest() {
         Film film1 = Film.builder().id(1).name("Хороший фильм").description("Описание хорошего фильма")
@@ -793,9 +791,9 @@ class FilmorateApplicationTests {
         filmDbStorage.addFilm(film3);
         filmGenreStorage.addGenreToFilm(3, 1);
 
-        List<Film> findByGenreAndYear = filmDbStorage.getMostPopularFilms(10,1,2000);
-        List<Film> findByGenre = filmDbStorage.getMostPopularFilms(10,1,null);
-        List<Film> findByYear = filmDbStorage.getMostPopularFilms(10,null,2000);
+        List<Film> findByGenreAndYear = filmDbStorage.getMostPopularFilms(10, 1, 2000);
+        List<Film> findByGenre = filmDbStorage.getMostPopularFilms(10, 1, null);
+        List<Film> findByYear = filmDbStorage.getMostPopularFilms(10, null, 2000);
 
         assertEquals(1, findByGenreAndYear.size());
         assertEquals(1, findByGenreAndYear.get(0).getId());
