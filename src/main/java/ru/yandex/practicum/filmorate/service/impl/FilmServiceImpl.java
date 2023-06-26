@@ -61,22 +61,19 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public List<Film> getAllFilms() {
         List<Film> films = filmStorage.getAllFilms();
-        films.stream()
-                .forEach(film -> film.getDirectors().addAll(directorStorage.getDirectorsForFilm(film.getId())));
-        Map<Long, Film> filmsMap = new HashMap<>();
-        for (Film film : films) {
-            filmsMap.put(film.getId(), film);
+        if (films.isEmpty()) {
+            return films;
         }
-        return new ArrayList<>(genreStorage.getGenresForFilm(filmsMap).values());
+        List<Film> filmsWithDir = directorStorage.setDirectorsForFilms(films);
+        return genreStorage.getGenresForFilm(filmsWithDir);
     }
 
     @Override
     public Film getFilmById(long id) {
         Film film = filmStorage.getFilmById(id);
         film.getDirectors().addAll(directorStorage.getDirectorsForFilm(film.getId()));
-        Map<Long, Film> filmsMap = new HashMap<>();
-        filmsMap.put(film.getId(), film);
-        return genreStorage.getGenresForFilm(filmsMap).get(film.getId());
+        film.getGenres().addAll(genreStorage.getGenreByFilm(id));
+        return film;
     }
 
     @Override
@@ -106,35 +103,33 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getMostPopularFilms(int count) {
-        List<Film> popularFilms = filmStorage.getMostPopularFilms(count);
-        Map<Long, Film> filmsMap = new HashMap<>();
-        for (Film film : popularFilms) {
-            filmsMap.put(film.getId(), film);
+        List<Film> films = filmStorage.getMostPopularFilms(count);
+        if (films.isEmpty()) {
+            return films;
         }
-        return new ArrayList<>(genreStorage.getGenresForFilm(filmsMap).values());
+        List<Film> filmsWithDir = directorStorage.setDirectorsForFilms(films);
+        return genreStorage.getGenresForFilm(filmsWithDir);
     }
 
     @Override
     public List<Film> getFilmsByDirector(int directorId, String sortBy) {
         directorStorage.getDirectorById(directorId);
         List<Film> films = filmStorage.getFilmsByDirector(directorId, sortBy);
-        films.stream()
-                .forEach(film -> {
-                    film.getDirectors().addAll(directorStorage.getDirectorsForFilm(film.getId()));
-                    film.getGenres().addAll(genreStorage.getGenreByFilm(film.getId()));
-                });
-        return films;
+        if (films.isEmpty()) {
+            return films;
+        }
+        List<Film> filmsWithDir = directorStorage.setDirectorsForFilms(films);
+        return genreStorage.getGenresForFilm(filmsWithDir);
     }
 
     @Override
     public List<Film> getFilmsByQuery(String query, String type) {
         List<Film> films = filmStorage.getFilmsByQuery(query, type);
-        films.stream()
-                .forEach(film -> {
-                    film.getDirectors().addAll(directorStorage.getDirectorsForFilm(film.getId()));
-                    film.getGenres().addAll(genreStorage.getGenreByFilm(film.getId()));
-                });
-        return films;
+        if (films.isEmpty()) {
+            return films;
+        }
+        List<Film> filmsWithDir = directorStorage.setDirectorsForFilms(films);
+        return genreStorage.getGenresForFilm(filmsWithDir);
     }
 
     public void validateFilms(Film film) throws ValidateException {

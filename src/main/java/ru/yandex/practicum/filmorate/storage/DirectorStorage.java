@@ -22,4 +22,6 @@ public interface DirectorStorage {
     void addDirectorsToFilm(Film film);
 
     void deleteDirectorsFromFilm(Film film);
+
+    List<Film> setDirectorsForFilms(List<Film> films);
 }

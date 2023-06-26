@@ -72,20 +72,20 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public Map<Long, Film> getGenresForFilm(Map<Long, Film> films) {
-        Set<Long> filmIds = films.keySet();
-        if (filmIds.isEmpty()) {
-            return films;
-        }
+    public List<Film> getGenresForFilm(List<Film> films) {
+        Map<Long, Film> filmMap = new LinkedHashMap<>();
+        films.forEach(film -> filmMap.put(film.getId(), film));
+        Set<Long> filmIds = filmMap.keySet();
+
         SqlParameterSource sqlParameterSource = new MapSqlParameterSource("filmIds", filmIds);
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         String sql = "SELECT g.genre_id, g.name, fg.film_id FROM genres g " +
                 "INNER JOIN film_genre fg ON g.genre_id = fg.genre_id WHERE fg.film_id IN (:filmIds)";
         namedParameterJdbcTemplate.query(sql, sqlParameterSource, (rs, rowNum) -> {
-            Film film = films.get(rs.getLong("film_id"));
+            Film film = filmMap.get(rs.getLong("film_id"));
             return film.getGenres().add(mapToRowGenre(rs));
         });
-        return films;
+        return new ArrayList<>(filmMap.values());
     }
 
     public Genre mapToRowGenre(ResultSet rs) throws SQLException {
