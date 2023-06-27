@@ -100,14 +100,13 @@ public class UserDbStorage implements UserStorage {
         String name = rs.getString("name");
         String login = rs.getString("login");
         LocalDate birthday = rs.getDate("birthday").toLocalDate();
-        User user = User.builder()
+        return User.builder()
                 .id(id)
                 .email(email)
                 .name(name)
                 .login(login)
                 .birthday(birthday)
                 .build();
-        return user;
     }
 
 }

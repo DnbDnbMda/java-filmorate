@@ -60,12 +60,7 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getAllFilms() {
-        List<Film> films = filmStorage.getAllFilms();
-        if (films.isEmpty()) {
-            return films;
-        }
-        List<Film> filmsWithDir = directorStorage.setDirectorsForFilms(films);
-        return genreStorage.getGenresForFilm(filmsWithDir);
+        return setDirectorsAndGenres(filmStorage.getAllFilms());
     }
 
     @Override
@@ -103,33 +98,18 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getMostPopularFilms(int count, Integer genreId, Integer year) {
-        List<Film> popularFilms = filmStorage.getMostPopularFilms(count, genreId, year);
-        if (popularFilms.isEmpty()) {
-            return popularFilms;
-        }
-        List<Film> filmsWithDir = directorStorage.setDirectorsForFilms(popularFilms);
-        return genreStorage.getGenresForFilm(filmsWithDir);
+        return setDirectorsAndGenres(filmStorage.getMostPopularFilms(count, genreId, year));
     }
 
     @Override
     public List<Film> getFilmsByDirector(int directorId, String sortBy) {
         directorStorage.getDirectorById(directorId);
-        List<Film> films = filmStorage.getFilmsByDirector(directorId, sortBy);
-        if (films.isEmpty()) {
-            return films;
-        }
-        List<Film> filmsWithDir = directorStorage.setDirectorsForFilms(films);
-        return genreStorage.getGenresForFilm(filmsWithDir);
+        return setDirectorsAndGenres(filmStorage.getFilmsByDirector(directorId, sortBy));
     }
 
     @Override
     public List<Film> getFilmsByQuery(String query, String type) {
-        List<Film> films = filmStorage.getFilmsByQuery(query, type);
-        if (films.isEmpty()) {
-            return films;
-        }
-        List<Film> filmsWithDir = directorStorage.setDirectorsForFilms(films);
-        return genreStorage.getGenresForFilm(filmsWithDir);
+        return setDirectorsAndGenres(filmStorage.getFilmsByQuery(query, type));
     }
 
     public void validateFilms(Film film) throws ValidateException {
@@ -157,7 +137,10 @@ public class FilmServiceImpl implements FilmService {
 
     @Override
     public List<Film> getCommonFilms(long userId, long friendId) {
-        List<Film> films = filmStorage.getCommonFilms(userId, friendId);
+        return setDirectorsAndGenres(filmStorage.getCommonFilms(userId, friendId));
+    }
+
+    private List<Film> setDirectorsAndGenres(List<Film> films) {
         if (films.isEmpty()) {
             return films;
         }
