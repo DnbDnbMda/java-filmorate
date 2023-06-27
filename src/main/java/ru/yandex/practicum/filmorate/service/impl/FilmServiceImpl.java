@@ -33,11 +33,11 @@ public class FilmServiceImpl implements FilmService {
     public Film addFilm(Film film) throws ValidateException {
         validateFilms(film);
         filmStorage.addFilm(film);
-        if (film.getGenres() != null) {
+        if (Objects.nonNull(film.getGenres())) {
             filmGenreStorage.removeGenreFromFilm(film.getId());
             genreStorage.setGenresToFilms(film.getId(), film.getGenres());
         }
-        if (film.getDirectors() != null) {
+        if (Objects.nonNull(film.getDirectors())) {
             directorStorage.addDirectorsToFilm(film);
         }
         return film;
@@ -48,11 +48,11 @@ public class FilmServiceImpl implements FilmService {
         validateFilms(film);
         filmStorage.updateFilm(film);
         filmGenreStorage.removeGenreFromFilm(film.getId());
-        if (film.getGenres() != null) {
+        if (Objects.nonNull(film.getGenres())) {
             genreStorage.setGenresToFilms(film.getId(), film.getGenres());
         }
         directorStorage.deleteDirectorsFromFilm(film);
-        if (film.getDirectors() != null) {
+        if (Objects.nonNull(film.getDirectors())) {
             directorStorage.addDirectorsToFilm(film);
         }
         return film;

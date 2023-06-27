@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.service.DirectorService;
@@ -8,13 +9,10 @@ import ru.yandex.practicum.filmorate.storage.DirectorStorage;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DirectorServiceImpl implements DirectorService {
 
     private final DirectorStorage directorStorage;
-
-    public DirectorServiceImpl(DirectorStorage directorStorage) {
-        this.directorStorage = directorStorage;
-    }
 
     @Override
     public Director addDirector(Director director) {
