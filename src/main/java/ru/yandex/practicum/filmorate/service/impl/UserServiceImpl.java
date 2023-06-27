@@ -4,16 +4,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ValidateException;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.GenreStorage;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.dao.FriendshipDbStorage;
 
 import javax.validation.ValidationException;
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -23,11 +27,20 @@ import static java.lang.String.format;
 public class UserServiceImpl implements UserService {
     private final UserStorage userStorage;
     private final FriendshipDbStorage friendshipDbStorage;
+    private final FilmStorage filmDbStorage;
+    private final DirectorStorage directorDbStorage;
+    private final GenreStorage genreDbStorage;
+    private final FeedStorage feedStorage;
 
     @Autowired
-    public UserServiceImpl(UserStorage userStorage, FriendshipDbStorage friendshipDbStorage) {
+    public UserServiceImpl(UserStorage userStorage, FriendshipDbStorage friendshipDbStorage, FilmStorage filmDbStorage,
+                           DirectorStorage directorDbStorage, GenreStorage genreDbStorage, FeedStorage feedStorage) {
         this.userStorage = userStorage;
         this.friendshipDbStorage = friendshipDbStorage;
+        this.filmDbStorage = filmDbStorage;
+        this.directorDbStorage = directorDbStorage;
+        this.genreDbStorage = genreDbStorage;
+        this.feedStorage = feedStorage;
     }
 
     @Override
@@ -60,6 +73,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void deleteUser(long id) {
+        userStorage.deleteUser(id);
+    }
+
+    @Override
     public void addToFriend(long friendId, long userId) {
         Set<Long> usersFriends = getUserById(userId).getFriends();
         Set<Long> friendsFriends = getUserById(friendId).getFriends();
@@ -68,6 +86,7 @@ public class UserServiceImpl implements UserService {
         if (!isUserHasFriend && !isFriendHasUserFriend) {
             friendshipDbStorage.addToFriend(userId, friendId);
             usersFriends.add(friendId);
+            feedStorage.addEntityToFeed(friendId, "ADD", "FRIEND", userId);
             log.info("Пользователь с id {} добавлен в друзья к {}", userId, friendId);
         } else if (!isUserHasFriend) {
             friendshipDbStorage.addToFriend(userId, friendId);
@@ -75,6 +94,7 @@ public class UserServiceImpl implements UserService {
             friendshipDbStorage.updateFriendStatus(friendId, userId, true);
             log.info("Пользователь id = {} подтвердил дружбу с пользователем id = {}", userId, friendId);
             usersFriends.add(friendId);
+            feedStorage.addEntityToFeed(friendId, "ADD", "FRIEND", userId);
         } else {
             log.info("Пользователь id = {} уже в друзьях у пользователя id = {}", friendId, userId);
             throw new ValidationException(format("Пользователь id = %s уже в друзьях у пользователя id = %s",
@@ -88,6 +108,7 @@ public class UserServiceImpl implements UserService {
         Set<Long> friendsFriends = getUserById(friendId).getFriends();
         if (!friendsFriends.contains(userId)) {
             friendshipDbStorage.deleteFromFriend(userId, friendId);
+            feedStorage.addEntityToFeed(friendId, "REMOVE", "FRIEND", userId);
             log.info("Пользователь id = {} удалил из друзей пользователя id = {}", userId, friendId);
         } else if (!usersFriends.contains(friendId)) {
             log.error("Пользователь id = {} не в друзьях у пользователя id = {}", friendId, userId);
@@ -95,6 +116,7 @@ public class UserServiceImpl implements UserService {
                     friendId, userId));
         } else {
             friendshipDbStorage.deleteFromFriend(userId, friendId);
+            feedStorage.addEntityToFeed(friendId, "REMOVE", "FRIEND", userId);
             friendshipDbStorage.updateFriendStatus(friendId, userId, false);
             log.info("Пользователь id = {} удалил из друзей пользователя id = {}, статус дружбы обновлен",
                     userId, friendId);
@@ -103,6 +125,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> getAllFriends(long id) {
+        userStorage.getUserById(id);
         return getUsersByIds(friendshipDbStorage.getAllFriendsByUser(id));
     }
 
@@ -114,6 +137,23 @@ public class UserServiceImpl implements UserService {
                 .filter(userFriendsIds::contains)
                 .collect(Collectors.toList());
         return userStorage.getAllById(commonFriendsIds);
+    }
+
+    @Override
+    public Collection<Event> getUserFeed(long userId) {
+        getUserById(userId);
+
+        return feedStorage.getUserFeed(userId);
+    }
+
+    @Override
+    public List<Film> getRecommendation(long userId) {
+        List<Film> films = filmDbStorage.getRecommendation(userId);
+        if (films.isEmpty()) {
+            return films;
+        }
+        List<Film> filmsWithDir = directorDbStorage.setDirectorsForFilms(films);
+        return genreDbStorage.getGenresForFilm(filmsWithDir);
     }
 
     public void validateUser(User user) {

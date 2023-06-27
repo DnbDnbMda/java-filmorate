@@ -88,19 +88,25 @@ public class UserDbStorage implements UserStorage {
         return namedParameterJdbcTemplate.query(sqlAllId, idsParams, (rs, rowNum) -> mapRowToUser(rs));
     }
 
+    @Override
+    public void deleteUser(long id) {
+        String sqlDelUs = "DELETE FROM users WHERE user_id = ?";
+        jdbcTemplate.update(sqlDelUs, id);
+    }
+
     private User mapRowToUser(ResultSet rs) throws SQLException {
         long id = rs.getLong("user_id");
         String email = rs.getString("email");
         String name = rs.getString("name");
         String login = rs.getString("login");
         LocalDate birthday = rs.getDate("birthday").toLocalDate();
-        User user = User.builder()
+        return User.builder()
                 .id(id)
                 .email(email)
                 .name(name)
                 .login(login)
                 .birthday(birthday)
                 .build();
-        return user;
     }
+
 }

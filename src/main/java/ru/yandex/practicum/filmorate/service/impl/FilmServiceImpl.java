@@ -22,9 +22,10 @@ public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final FilmGenreStorage filmGenreStorage;
-    private final MpaStorage mpaStorage;
     private final GenreStorage genreStorage;
     private final LikesDbStorage likesDbStorage;
+    private final DirectorStorage directorStorage;
+    private final FeedStorage feedStorage;
     public static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
     public static final int LENGTH_DESCRIPTION = 200;
 
@@ -32,9 +33,12 @@ public class FilmServiceImpl implements FilmService {
     public Film addFilm(Film film) throws ValidateException {
         validateFilms(film);
         filmStorage.addFilm(film);
-        if (film.getGenres() != null) {
+        if (Objects.nonNull(film.getGenres())) {
             filmGenreStorage.removeGenreFromFilm(film.getId());
             genreStorage.setGenresToFilms(film.getId(), film.getGenres());
+        }
+        if (Objects.nonNull(film.getDirectors())) {
+            directorStorage.addDirectorsToFilm(film);
         }
         return film;
     }
@@ -44,28 +48,32 @@ public class FilmServiceImpl implements FilmService {
         validateFilms(film);
         filmStorage.updateFilm(film);
         filmGenreStorage.removeGenreFromFilm(film.getId());
-        if (film.getGenres() != null) {
+        if (Objects.nonNull(film.getGenres())) {
             genreStorage.setGenresToFilms(film.getId(), film.getGenres());
+        }
+        directorStorage.deleteDirectorsFromFilm(film);
+        if (Objects.nonNull(film.getDirectors())) {
+            directorStorage.addDirectorsToFilm(film);
         }
         return film;
     }
 
     @Override
     public List<Film> getAllFilms() {
-        List<Film> films = filmStorage.getAllFilms();
-        Map<Long, Film> filmsMap = new HashMap<>();
-        for (Film film : films) {
-            filmsMap.put(film.getId(), film);
-        }
-        return new ArrayList<>(genreStorage.getGenresForFilm(filmsMap).values());
+        return setDirectorsAndGenres(filmStorage.getAllFilms());
     }
 
     @Override
     public Film getFilmById(long id) {
         Film film = filmStorage.getFilmById(id);
-        Map<Long, Film> filmsMap = new HashMap<>();
-        filmsMap.put(film.getId(), film);
-        return genreStorage.getGenresForFilm(filmsMap).get(film.getId());
+        film.getDirectors().addAll(directorStorage.getDirectorsForFilm(film.getId()));
+        film.getGenres().addAll(genreStorage.getGenreByFilm(id));
+        return film;
+    }
+
+    @Override
+    public void deleteFilm(long id) {
+        filmStorage.deleteFilm(id);
     }
 
     @Override
@@ -73,6 +81,7 @@ public class FilmServiceImpl implements FilmService {
         getFilmById(filmId);
         userStorage.getUserById(userId);
         likesDbStorage.addLike(filmId, userId);
+        feedStorage.addEntityToFeed(userId, "ADD", "LIKE", filmId);
     }
 
     @Override
@@ -83,12 +92,24 @@ public class FilmServiceImpl implements FilmService {
         }
         userStorage.getUserById(userId);
         likesDbStorage.deleteLike(filmId, userId);
+        feedStorage.addEntityToFeed(userId, "REMOVE", "LIKE", filmId);
         return getFilmById(filmId);
     }
 
     @Override
-    public List<Film> getMostPopularFilms(int count) {
-        return filmStorage.getMostPopularFilms(count);
+    public List<Film> getMostPopularFilms(int count, Integer genreId, Integer year) {
+        return setDirectorsAndGenres(filmStorage.getMostPopularFilms(count, genreId, year));
+    }
+
+    @Override
+    public List<Film> getFilmsByDirector(int directorId, String sortBy) {
+        directorStorage.getDirectorById(directorId);
+        return setDirectorsAndGenres(filmStorage.getFilmsByDirector(directorId, sortBy));
+    }
+
+    @Override
+    public List<Film> getFilmsByQuery(String query, String type) {
+        return setDirectorsAndGenres(filmStorage.getFilmsByQuery(query, type));
     }
 
     public void validateFilms(Film film) throws ValidateException {
@@ -112,5 +133,18 @@ public class FilmServiceImpl implements FilmService {
             log.error("ERROR: MPA не загрузился");
             throw new ValidateException("Необходимо добавить MPA");
         }
+    }
+
+    @Override
+    public List<Film> getCommonFilms(long userId, long friendId) {
+        return setDirectorsAndGenres(filmStorage.getCommonFilms(userId, friendId));
+    }
+
+    private List<Film> setDirectorsAndGenres(List<Film> films) {
+        if (films.isEmpty()) {
+            return films;
+        }
+        List<Film> filmsWithDir = directorStorage.setDirectorsForFilms(films);
+        return genreStorage.getGenresForFilm(filmsWithDir);
     }
 }

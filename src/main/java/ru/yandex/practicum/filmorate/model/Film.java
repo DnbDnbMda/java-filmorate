@@ -27,4 +27,5 @@ public class Film {
     private MpaRating mpa;
     private final Set<Long> likes = new HashSet<>();
     private final List<Genre> genres = new ArrayList<>();
+    private final Set<Director> directors = new HashSet<>();
 }
